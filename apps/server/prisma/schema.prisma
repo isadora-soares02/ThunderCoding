@@ -1,0 +1,33 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+/**
+ * IMPORTANTE:
+ * -----------------------
+ * 1) O Better Auth pode gerar o schema necessário para autenticação.
+ * 2) Então, depois de configurar o src/lib/auth.ts, rode:
+ * npm run auth:generate
+ * 3) Depois rode:
+ * npm run prisma:generate
+ * npm run prisma:migrate -- --name init
+ * 4) Aqui embaixo vocês podem adicionar os modelos do domínio do projeto.
+ */
+
+model Example {
+    id          String  @id @default(uuid())
+    title       String
+    description String?
+    level       String
+    isPublished Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("example")
+}
