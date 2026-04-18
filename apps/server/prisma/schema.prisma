@@ -1,80 +1,176 @@
 generator client {
-    provider = "prisma-client-js"
-    previewFeatures = ["driverAdapters"] // Necessário para o adaptador PG
-    //output   = "../src/generated/prisma"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  // A url foi removida daqui denovo e será gerida pelo prisma.config.ts
 }
 
 model User {
-    id            String    @id
-    name          String
-    email         String    @unique
-    emailVerified Boolean
-    image         String?
-    createdAt     DateTime
-    updatedAt     DateTime
-    sessions      Session[]
-    accounts      Account[]
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
 
-    @@map("user")
+  // Relações para o sistema de aprendizagem
+  userProgress      UserProgress?
+  challengeProgress ChallengeProgress[]
+
+  @@map("user")
 }
 
 model Session {
-    id        String   @id
-    expiresAt DateTime
-    token     String
-    createdAt DateTime
-    updatedAt DateTime
-    ipAddress String?
-    userAgent String?
-    userId    String
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("session")
+  @@map("session")
 }
 
 model Account {
-    id                    String    @id
-    accountId             String
-    providerId            String
-    userId                String
-    user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    accessToken           String?
-    refreshToken          String?
-    idToken               String?
-    accessTokenExpiresAt  DateTime?
-    refreshTokenExpiresAt DateTime?
-    scope                 String?
-    password              String?
-    createdAt             DateTime
-    updatedAt             DateTime
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
 
-    @@map("account")
+  @@map("account")
 }
 
 model Verification {
-    id         String    @id
-    identifier String
-    value      String
-    expiresAt  DateTime
-    createdAt  DateTime?
-    updatedAt  DateTime?
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
 
-    @@map("verification")
+  @@map("verification")
+}
+
+model Course {
+  id           String         @id @default(uuid())
+  title        String
+  imageSrc     String // Ícone da linguagem
+  units        Unit[]
+  userProgress UserProgress[]
+
+  @@map("course")
+}
+
+model Unit {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+  order       Int // Para garantir a sequência correta
+
+  @@map("unit")
+}
+
+model Lesson {
+  id         String      @id @default(uuid())
+  title      String
+  unitId     String
+  unit       Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  challenges Challenge[]
+  order      Int
+
+  @@map("lesson")
+}
+
+enum ChallengeType {
+  SELECT
+  ASSIST
+  ORDER
+}
+
+model Challenge {
+  id       String          @id @default(uuid())
+  type     ChallengeType
+  question String
+  lessonId String
+  lesson   Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order    Int
+  options  ChallengeOption[]
+
+  // Relação inversa para o progresso
+  challengeProgress ChallengeProgress[]
+
+  @@map("challenge")
+}
+
+model ChallengeOption {
+  id          String    @id @default(uuid())
+  text        String // O código ou texto da opção
+  isCorrect   Boolean
+  imageSrc    String? // Opcional para desafios visuais
+  audioSrc    String? // Útil para termos técnicos
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  order       Int? // Crucial para o ChallengeType "ORDER"
+
+  @@map("challenge_option")
+}
+
+model UserProgress {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activeCourseId String?
+  activeCourse   Course? @relation(fields: [activeCourseId], references: [id])
+
+  hearts Int @default(5)
+  points Int @default(0)
+  streak Int @default(0)
+
+  @@map("user_progress")
+}
+
+model ChallengeProgress {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  completed Boolean @default(false)
+
+  @@map("challenge_progress")
 }
 
 model Example {
-    id          String   @id @default(uuid())
-    title       String
-    description String?
-    level       String
-    isPublished Boolean  @default(true)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  level       String
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    @@map("example")
+  @@map("example")
 }

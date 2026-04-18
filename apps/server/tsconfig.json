@@ -12,7 +12,8 @@
     },
     "include": [
         "src/**/*", // Garante que apanha subpastas
-        "prisma.config.ts" 
+        "prisma.config.ts",
+        "prisma/**/*.ts"
     ],
     "exclude": ["node_modules", "dist"] // Explicitamente ignorar estas pastas
 }
