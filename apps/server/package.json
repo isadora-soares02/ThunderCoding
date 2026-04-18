@@ -28,5 +28,9 @@
     "fastify": "^5.8.5",
     "pg": "^8.20.0",
     "zod": "^4.3.6"
-  }
+  },
+
+  "prisma": {
+  "seed": "ts-node prisma/seed.ts"
+}
 }
