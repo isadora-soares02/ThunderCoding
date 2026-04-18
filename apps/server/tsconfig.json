@@ -4,12 +4,15 @@
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
         "outDir": "dist",
-        "rootDir": "src",
+        "rootDir": ".", // Mudamos de "." para "src" para focar no teu código
         "strict": true,
         "skipLibCheck": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "types": ["node"] 
     },
     "include": [
-        "src"
-    ]
+        "src/**/*", // Garante que apanha subpastas
+        "prisma.config.ts" 
+    ],
+    "exclude": ["node_modules", "dist"] // Explicitamente ignorar estas pastas
 }

@@ -1,28 +1,27 @@
-import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "../generated/prisma/client.js"
-import { env } from "./env.js"
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client"; // Importa do pacote padrão
+import pg from "pg"; // Precisas do driver 'pg' para o adaptador
+import { env } from "./env.js";
 
 /**
  * Instância única do Prisma.
- * 
- * Em desenvolvimento, usamos uma variável global para evitar
- * recriar o client a cada reload do tsx watch.
+ * Usamos globalThis para evitar múltiplas instâncias em desenvolvimento (Hot Reload).
  */
 const globalForPrisma = globalThis as unknown as {
-    prisma?: PrismaClient
-}
+    prisma: PrismaClient | undefined;
+};
 
-const adapter = new PrismaPg({
-    connectionString: env.DATABASE_URL
-})
+// Configuração do Driver do PostgreSQL para o adaptador
+const pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
 
 export const prisma =
     globalForPrisma.prisma ??
     new PrismaClient({
         log: ["warn", "error"],
         adapter
-    })
+    });
 
 if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prisma
+    globalForPrisma.prisma = prisma;
 }

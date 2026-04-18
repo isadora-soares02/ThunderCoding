@@ -19,27 +19,21 @@ export async function buildApp() {
         logger: true
     })
 
-    // 1) CORS primeiro
+    // 1) CORS primeiro (essencial para o front-end conseguir falar com o Better Auth)
     await registerCors(app)
 
-    /**
-     * Prefixo global da API.
-     * 
-     * Tudo que for rota do projeto vai seguir o padrão:
-     * /api/...
-     * 
-     * Exemplos:
-     * /api/health
-     * /api/auth/sign-in/email
-     */
+    // 2) Prefixo global da API
     await app.register(async function apiRoutes(api) {
-        // 2) Handler do Better Auth
+        
+        // Handler do Better Auth
+        // Nota: Dentro de apiRoutes, esta rota será /api/auth/*
         await registerAuthHandler(api)
 
-        // 3) Rotas de domínio da aplicação
-        await api.register(healthRoutes, { prefix: "/health" })
-        await api.register(userRoutes, { prefix: "/users" })
-        await api.register(exampleRoutes, { prefix: "/example" })
+        // Rotas de domínio
+        api.register(healthRoutes, { prefix: "/health" })
+        api.register(userRoutes, { prefix: "/users" })
+        api.register(exampleRoutes, { prefix: "/example" })
+        
     }, { prefix: "/api" })
 
     return app
