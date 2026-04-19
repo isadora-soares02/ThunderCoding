@@ -3,10 +3,10 @@ import { auth } from "../lib/auth.js";
 
 export async function registerAuthHandler(app: FastifyInstance) {
     // Usamos 'all' para aceitar qualquer método (GET, POST, PATCH, DELETE, etc)
-    app.all("/api/auth/*", async (request, reply) => {
+    app.all("/auth/*", async (request, reply) => {
         try {
             // Construção robusta da URL
-            const url = new URL(request.url, `${request.protocol}://${request.headers.host}`);
+           const url = new URL(`http://127.0.0.1:3333${request.url}`);
 
             // Conversão de Headers do Fastify para Fetch API
             const headers = new Headers();
