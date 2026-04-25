@@ -1,34 +1,63 @@
-import Link from "next/link";
+"use client"
 
-export default function HomePage() {
+import { useState } from "react"
+import { authClient } from "@/lib/auth-client"
+
+export default function AuthPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+
+    try {
+      await authClient.login({
+        email,
+        password,
+      })
+
+      alert("Login feito com sucesso!")
+    } catch (err) {
+      console.error(err)
+      alert("Erro ao logar")
+    }
+  }
+
   return (
-    <section className="space-y-6">
-      <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-        <p className="mb-2 text-sm font-medium text-cyan-700">ThunderCoding</p>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Frontend base pronto para começar
+    <section className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Thunder Coding 
         </h1>
-        <p className="mt-3 max-w-2xl text-slate-600">
-          Esta base já inclui layout, integração com a API, cliente de
-          autenticação e uma página de exemplo consumindo o backend.
-        </p>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            href="/example"
-            className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white"
-          >
-            Ver página de exemplo
-          </Link>
+        <form onSubmit={handleLogin} className="space-y-4">
 
-          <Link
-            href="/auth"
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800"
+          <input
+            type="email"
+            placeholder="Seu email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
+
+          <input
+            type="password"
+            placeholder="Sua senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-yellow-500 text-white py-3 rounded-lg font-semibold hover:bg-yellow-600 transition"
           >
-            Ver exemplo de auth
-          </Link>
-        </div>
+            Entrar
+          </button>
+
+        </form>
       </div>
     </section>
-  );
+  )
 }
