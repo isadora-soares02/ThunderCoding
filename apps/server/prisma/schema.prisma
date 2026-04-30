@@ -1,6 +1,6 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -109,11 +109,11 @@ enum ChallengeType {
 }
 
 model Challenge {
-  id       String          @id @default(uuid())
+  id       String            @id @default(uuid())
   type     ChallengeType
   question String
   lessonId String
-  lesson   Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lesson   Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   order    Int
   options  ChallengeOption[]
 
@@ -133,7 +133,7 @@ model ChallengeOption {
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   order       Int? // Crucial para o ChallengeType "ORDER"
 
-  @@map("challenge_option")
+  @@map("challengeOption")
 }
 
 model UserProgress {
@@ -147,7 +147,7 @@ model UserProgress {
   points Int @default(0)
   streak Int @default(0)
 
-  @@map("user_progress")
+  @@map("userProgress")
 }
 
 model ChallengeProgress {
@@ -160,17 +160,5 @@ model ChallengeProgress {
 
   completed Boolean @default(false)
 
-  @@map("challenge_progress")
-}
-
-model Example {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  level       String
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("example")
+  @@map("challengeProgress")
 }

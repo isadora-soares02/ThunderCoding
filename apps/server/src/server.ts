@@ -1,11 +1,6 @@
-import "dotenv/config";
 import { buildApp } from "./app.js"
 import { env } from "./lib/env.js"
 
-/**
- * server.ts:
- * arquivo de entrada do servidor.
- */
 const start = async () => {
     const app = await buildApp()
 

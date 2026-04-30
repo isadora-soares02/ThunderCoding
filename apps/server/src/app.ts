@@ -1,52 +1,55 @@
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import Fastify from "fastify";
+import {
+    serializerCompiler,
+    validatorCompiler,
+} from "fastify-type-provider-zod";
+import { SwaggerTheme, SwaggerThemeNameEnum } from "swagger-themes";
+import { healthRoutes } from "./modules/health/routes";
+import { registerAuthHandler } from "./plugins/auth-handler";
 import { registerCors } from "./plugins/cors.js";
-import { registerAuthHandler } from "./plugins/auth-handler.js";
-import { healthRoutes } from "./modules/health/routes.js";
-import { userRoutes } from "./modules/users/routes.js";
-import { exampleRoutes } from "./modules/example/routes.js";
-import { courseRoutes } from "./modules/courses/routes.js";
-import { unitRoutes } from "./modules/units/routes.js";
-import { lessonRoutes } from "./modules/lessons/routes.js";
-import { userProgressRoutes } from "./modules/user-progress/routes.js";
-import { challengeProgressRoutes } from "./modules/challenge-progress/routes.js";
-import { challengeRoutes } from "./modules/challenges/routes.js";
 
-/**
- * app.ts:
- * aqui montamos a aplicação Fastify.
- * 
- * Separar app.ts de server.ts ajuda:
- * - em testes, podemos importar só a app
- * - o bootstrap fica organizado
- * - melhor entendimento onde cada parte entra
- */
 export async function buildApp() {
     const app = Fastify({
-        logger: true
-    })
+        logger: true,
+    });
 
-    // 1) CORS primeiro (essencial para o front-end conseguir falar com o Better Auth)
-    await registerCors(app)
+    await registerCors(app);
 
-    // 2) Prefixo global da API
-    await app.register(async function apiRoutes(api) {
-        
-        // Handler do Better Auth
-        // Nota: Dentro de apiRoutes, esta rota será /api/auth/*
-        await registerAuthHandler(api)
+    const theme = new SwaggerTheme();
+    const content = theme.getBuffer(SwaggerThemeNameEnum.DARK);
 
-        // Rotas de domínio
-        api.register(healthRoutes, { prefix: "/health" })
-        api.register(userRoutes, { prefix: "/users" })
-        api.register(exampleRoutes, { prefix: "/example" })
-        api.register(courseRoutes, { prefix: "/courses" })
-        api.register(unitRoutes, { prefix: "/units" })
-        api.register(lessonRoutes, { prefix: "/lessons" })
-        api.register(userProgressRoutes, { prefix: "/user-progress" })
-        api.register(challengeProgressRoutes, { prefix: "/challenge-progress" })
-        api.register(challengeRoutes, { prefix: "/challenges" })
+    app.register(fastifySwagger, {
+        swagger: {
+            consumes: ["application/json"],
+            produces: ["application/json"],
+            info: {
+                title: "ThunderCoding",
+                description: "API ThunderCoding",
+                version: "1.0.0",
+            },
+        },
+    });
 
-    }, { prefix: "/api" })
+    app.register(fastifySwaggerUi, {
+        routePrefix: "/docs",
+        theme: {
+            css: [{ filename: "theme.css", content }],
+        },
+    });
 
-    return app
+    app.setValidatorCompiler(validatorCompiler);
+    app.setSerializerCompiler(serializerCompiler);
+
+    await app.register(
+        async function apiRoutes(api) {
+            await registerAuthHandler(api);
+
+            await api.register(healthRoutes, { prefix: "/health" });
+        },
+        { prefix: "/api" }
+    );
+
+    return app;
 }

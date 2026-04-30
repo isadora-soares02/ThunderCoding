@@ -1,36 +1,45 @@
 {
-  "name": "@thundercoding/server",
+  "name": "server",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsup src",
     "start": "node dist/server.js",
-    "lint": "echo \"configure eslint later\"",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "studio": "npx prisma studio",
+    "migrate": "npx prisma migrate dev",
+    "database:up": "docker compose --profile dev up -d",
+    "database:stop": "docker compose --profile dev stop",
+    "database:down": "docker compose --profile dev down"
   },
-  "devDependencies": {
-    "@better-auth/cli": "^1.4.21",
-    "@types/node": "^25.6.0",
-    "@types/pg": "^8.20.0",
-    "prisma": "^7.7.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
-    "@prisma/adapter-pg": "^7.7.0",
-    "@prisma/client": "^7.7.0",
-    "better-auth": "^1.6.4",
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.6",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "bcrypt": "^6.0.0",
+    "better-auth": "^1.6.9",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
+    "fastify-type-provider-zod": "^6.1.0",
+    "helmet": "^8.1.0",
     "pg": "^8.20.0",
-    "zod": "^4.3.6"
+    "swagger-themes": "^1.4.3",
+    "zod": "^4.4.1"
   },
-
-  "prisma": {
-  "seed": "ts-node prisma/seed.ts"
-}
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.8.0",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "5.9.2"
+  }
 }

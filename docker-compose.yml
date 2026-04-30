@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    profiles: [dev, prod]
+    image: bitnami/postgresql:14 
+    container_name: postgres-db
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port for development (remove in production)
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME:-docker}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-docker}
+      - POSTGRES_DB=${DATABASE_NAME:-blog}
+    volumes:
+      - blog_db_volume:/bitnami/postgresql  # Persist database data in a Docker volume
+    networks:
+      - blog-network
+    env_file:
+      - .env  # Load environment variables from the .env file
+
+volumes:
+  blog_db_volume:
+    driver: local  # Specify the volume driver for local persistence
+
+networks:
+  blog-network:
+    driver: bridge  # Use the bridge network for service communication
