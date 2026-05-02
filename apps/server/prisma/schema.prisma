@@ -7,6 +7,36 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum LessonType {
+  TEXT
+  VIDEO
+  ASSIGNMENT
+  QUIZ
+}
+
+enum AnswerKey {
+  A
+  B
+  C
+  D
+}
+
 model User {
   id            String    @id
   name          String
@@ -18,9 +48,16 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  // Relações para o sistema de aprendizagem
-  userProgress      UserProgress?
-  challengeProgress ChallengeProgress[]
+  role             UserRole  @default(USER)
+  xp               Int       @default(0)
+  level            Int       @default(1)
+  streak           Int       @default(0)
+  completedCourses Int       @default(0)
+  lastStudyDate    DateTime?
+
+  courseProgress UserCourseProgress[]
+  lessonProgress UserLessonProgress[]
+  achievements   UserAchievement[]
 
   @@map("user")
 }
@@ -70,95 +107,185 @@ model Verification {
 }
 
 model Course {
-  id           String         @id @default(uuid())
-  title        String
-  imageSrc     String // Ícone da linguagem
-  units        Unit[]
-  userProgress UserProgress[]
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  language    String
+  level       Difficulty
+  duration    String
+  xp          Int
+  instructor  String
+  banner      String?
+  color       String?
+  status      CourseStatus @default(DRAFT)
+
+  lessons   Lesson[]
+  questions Question[]
+  tasks     Task[]
+  trails    TrailCourse[]
+  progress  UserCourseProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("course")
 }
 
-model Unit {
-  id          String   @id @default(uuid())
-  title       String
+model Trail {
+  id          String       @id @default(cuid())
+  name        String
   description String
-  courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons     Lesson[]
-  order       Int // Para garantir a sequência correta
+  level       Difficulty
+  totalXp     Int
+  progress    Int          @default(0)
+  status      CourseStatus @default(DRAFT)
+  color       String?
+  icon        String?
 
-  @@map("unit")
+  courses TrailCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("trail")
+}
+
+model TrailCourse {
+  id       String @id @default(cuid())
+  trailId  String
+  courseId String
+  order    Int    @default(0)
+
+  trail  Trail  @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([trailId, courseId])
+  @@map("trailCourse")
 }
 
 model Lesson {
-  id         String      @id @default(uuid())
-  title      String
-  unitId     String
-  unit       Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  challenges Challenge[]
-  order      Int
+  id          String     @id @default(cuid())
+  courseId    String
+  title       String
+  type        LessonType
+  content     String
+  videoUrl    String?
+  order       Int
+  xp          Int
+  durationMin Int        @default(5)
 
+  course   Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress UserLessonProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, order])
   @@map("lesson")
 }
 
-enum ChallengeType {
-  SELECT
-  ASSIST
-  ORDER
+model Question {
+  id          String     @id @default(cuid())
+  courseId    String
+  question    String
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String
+  correct     AnswerKey
+  explanation String
+  xp          Int
+  difficulty  Difficulty
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("question")
 }
 
-model Challenge {
-  id       String            @id @default(uuid())
-  type     ChallengeType
-  question String
-  lessonId String
-  lesson   Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  order    Int
-  options  ChallengeOption[]
+model Task {
+  id            String   @id @default(cuid())
+  courseId      String
+  title         String
+  description   String
+  objective     String
+  xp            Int
+  estimatedTime String
+  requirements  String[]
 
-  // Relação inversa para o progresso
-  challengeProgress ChallengeProgress[]
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  @@map("challenge")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("task")
 }
 
-model ChallengeOption {
-  id          String    @id @default(uuid())
-  text        String // O código ou texto da opção
-  isCorrect   Boolean
-  imageSrc    String? // Opcional para desafios visuais
-  audioSrc    String? // Útil para termos técnicos
-  challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  order       Int? // Crucial para o ChallengeType "ORDER"
+model Achievement {
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  criterion   String
+  xpBonus     Int
+  status      CourseStatus @default(PUBLISHED)
 
-  @@map("challengeOption")
+  users UserAchievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("achievement")
 }
 
-model UserProgress {
-  userId String @id
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  activeCourseId String?
-  activeCourse   Course? @relation(fields: [activeCourseId], references: [id])
-
-  hearts Int @default(5)
-  points Int @default(0)
-  streak Int @default(0)
-
-  @@map("userProgress")
-}
-
-model ChallengeProgress {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
+model UserCourseProgress {
+  id        String  @id @default(cuid())
+  userId    String
+  courseId  String
+  progress  Int     @default(0)
   completed Boolean @default(false)
 
-  @@map("challengeProgress")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@map("userCourseProgress")
+}
+
+model UserLessonProgress {
+  id        String  @id @default(cuid())
+  userId    String
+  lessonId  String
+  completed Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("userLessonProgress")
+}
+
+model UserAchievement {
+  id            String  @id @default(cuid())
+  userId        String
+  achievementId String
+  unlocked      Boolean @default(false)
+  progress      Int     @default(0)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, achievementId])
+  @@map("userAchievement")
 }
