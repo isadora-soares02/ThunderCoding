@@ -38,7 +38,7 @@ enum AnswerKey {
 }
 
 model User {
-  id            String    @id
+  id            String    @id @default(uuid())
   name          String
   email         String    @unique
   emailVerified Boolean
@@ -58,6 +58,7 @@ model User {
   courseProgress UserCourseProgress[]
   lessonProgress UserLessonProgress[]
   achievements   UserAchievement[]
+  taskProgress   UserTaskProgress[]
 
   @@map("user")
 }
@@ -215,7 +216,8 @@ model Task {
   estimatedTime String
   requirements  String[]
 
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress UserTaskProgress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -288,4 +290,21 @@ model UserAchievement {
 
   @@unique([userId, achievementId])
   @@map("userAchievement")
+}
+
+model UserTaskProgress {
+  id        String  @id @default(cuid())
+  userId    String
+  taskId    String
+  completed Boolean @default(false)
+  answer    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, taskId])
+  @@map("userTaskProgress")
 }

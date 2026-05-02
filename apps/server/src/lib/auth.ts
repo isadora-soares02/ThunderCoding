@@ -28,6 +28,41 @@ export const auth = betterAuth({
         }
     },
 
+    user: {
+        additionalFields: {
+            role: {
+                type: "string",
+                required: false,
+                defaultValue: "USER",
+                input: false
+            },
+            xp: {
+                type: "number",
+                required: false,
+                defaultValue: 0,
+                input: false,
+            },
+            level: {
+                type: "number",
+                required: false,
+                defaultValue: 1,
+                input: false,
+            },
+            streak: {
+                type: "number",
+                required: false,
+                defaultValue: 0,
+                input: false,
+            },
+            completedCourses: {
+                type: "number",
+                required: false,
+                defaultValue: 0,
+                input: false
+            }
+        }
+    },
+
     experimental: {
         joins: true
     }
