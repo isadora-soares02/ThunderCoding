@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,12 +17,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body
-        className={
-          "pattern-bg flex min-h-screen items-center justify-center p-md font-body-md text-on-surface"
-        }
-      >
+    <html className={cn("font-sans", inter.variable)} lang="pt-BR">
+      <body>
+        <Toaster />
         {children}
       </body>
     </html>
