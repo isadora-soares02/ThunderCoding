@@ -149,7 +149,7 @@ export default function LessonVideo() {
 
                         {next && (
                             <Button
-                                onClick={() => router.replace(getLessonHref(next))}
+                                onClick={() => router.push(getLessonHref(next))}
                                 variant="outline"
                             >
                                 Próxima aula <ArrowRight size={16} />

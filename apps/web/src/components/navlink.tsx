@@ -1,6 +1,8 @@
+"use client";
+
 import Link, { type LinkProps } from "next/link";
 import { usePathname } from "next/navigation";
-import type { AnchorHTMLAttributes, ReactNode, RefObject } from "react";
+import { type AnchorHTMLAttributes, forwardRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type NavLinkClassName = string | ((props: { isActive: boolean }) => string);
@@ -17,36 +19,40 @@ interface NavLinkProps
     end?: boolean;
 }
 
-const NavLink = ({
-    className,
-    activeClassName,
-    href,
-    end,
-    ref,
-    ...props
-}: NavLinkProps & { ref?: RefObject<HTMLAnchorElement | null> }) => {
-    const pathname = usePathname();
+const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
+    ({ className, activeClassName, href, end, ...props }, ref) => {
+        const pathname = usePathname();
 
-    const hrefString = typeof href === "string" ? href : (href.pathname ?? "");
+        const hrefString =
+            typeof href === "string"
+                ? href
+                : typeof href.pathname === "string"
+                    ? href.pathname
+                    : "";
 
-    const isActive = end
-        ? pathname === hrefString
-        : hrefString === "/"
-            ? pathname === "/"
-            : pathname === hrefString || pathname.startsWith(`${hrefString}/`);
+        console.log({ pathname, hrefString })
 
-    const resolvedClassName =
-        typeof className === "function" ? className({ isActive }) : className;
+        const isActive = end
+            ? pathname === hrefString
+            : hrefString === "/"
+                ? pathname === "/"
+                : pathname === hrefString || pathname.startsWith(`${hrefString}/`);
 
-    return (
-        <Link
-            className={cn(resolvedClassName, isActive && activeClassName)}
-            href={href}
-            ref={ref}
-            {...props}
-        />
-    );
-};
+        const resolvedClassName =
+            typeof className === "function" ? className({ isActive }) : className;
+
+        return (
+            <Link
+                className={cn(resolvedClassName, isActive && activeClassName)}
+                href={href}
+                ref={ref}
+                {...props}
+            >
+                {props.children}
+            </Link>
+        );
+    }
+);
 
 NavLink.displayName = "NavLink";
 

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { prisma } from "../../lib/prisma.js";
 import { getSession, requireAuth } from "../../plugins/auth.js";
+import { fromDifficulty } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { achievementToResponse } from "../achievement/achievement.mapper.js";
 import { courseToResponse } from "../courses/course.mapper.js";
@@ -128,6 +129,7 @@ export function dashboardRoutes(app: FastifyInstance) {
                 id: trail.id,
                 name: trail.name,
                 description: trail.description,
+                level: fromDifficulty(trail.level),
                 totalXp: trail.totalXp,
                 progress: trail.progress,
                 color: trail.color ?? "primary",

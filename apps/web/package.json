@@ -17,6 +17,7 @@
     "better-auth": "^1.6.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "isomorphic-dompurify": "^3.12.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.0",
     "postcss": "^8.5.13",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^22.19.17",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

@@ -54,7 +54,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 </nav>
                 <div className="mt-auto flex flex-col gap-1">
                     <Button
-                        onClick={() => router.replace("/dashboard")}
+                        onClick={() => router.push("/dashboard")}
                         size="sm"
                         variant="outline"
                     >
@@ -63,7 +63,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                     <Button
                         onClick={async () => {
                             await authClient.signOut();
-                            router.replace("/login");
+                            router.push("/login");
                         }}
                         size="sm"
                         variant="ghost"
@@ -88,7 +88,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
                     <div className="ml-auto flex gap-1 md:hidden">
                         <Button
-                            onClick={() => router.replace("/dashboard")}
+                            onClick={() => router.push("/dashboard")}
                             size="sm"
                             variant="outline"
                         >

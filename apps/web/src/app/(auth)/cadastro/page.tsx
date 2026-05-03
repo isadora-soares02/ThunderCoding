@@ -31,7 +31,7 @@ export default function Register() {
                 password: data.password,
             });
             toast.success("Conta criada! Sua jornada começa agora 🚀");
-            router.replace("/dashboard");
+            router.push("/dashboard");
         } catch {
             toast.error("Não foi possível criar a conta.");
         }

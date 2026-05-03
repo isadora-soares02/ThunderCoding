@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "isomorphic-dompurify";
 import { ArrowLeft, ArrowRight, CheckCircle2, FileText } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -92,6 +93,8 @@ export default function LessonView() {
         return `/aulas/${item.id}`;
     };
 
+    const safeContent = DOMPurify.sanitize(lesson.content ?? "");
+
     return (
         <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
             <div className="space-y-5">
@@ -113,9 +116,10 @@ export default function LessonView() {
 
                     <ProgressBar gradient value={progresso} />
 
-                    <article className="prose prose-sm max-w-none whitespace-pre-line text-foreground">
-                        {lesson.content}
-                    </article>
+                    <article
+                        className="prose prose-sm max-w-none text-foreground"
+                        dangerouslySetInnerHTML={{ __html: safeContent }}
+                    />
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <Button
@@ -135,7 +139,7 @@ export default function LessonView() {
                         <div className="flex gap-2">
                             <Button
                                 disabled={!prev}
-                                onClick={() => prev && router.replace(getLessonHref(prev))}
+                                onClick={() => prev && router.push(getLessonHref(prev))}
                                 variant="outline"
                             >
                                 <ArrowLeft size={16} /> Aula anterior
@@ -143,7 +147,7 @@ export default function LessonView() {
 
                             <Button
                                 disabled={!next}
-                                onClick={() => next && router.replace(getLessonHref(next))}
+                                onClick={() => next && router.push(getLessonHref(next))}
                             >
                                 Próxima aula <ArrowRight size={16} />
                             </Button>

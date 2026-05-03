@@ -36,7 +36,7 @@ export default function LoginPage() {
             }
 
             toast.success("Bem-vindo de volta!");
-            router.replace("/dashboard");
+            router.push("/dashboard");
         } catch {
             toast.error("Não foi possível entrar.");
         }

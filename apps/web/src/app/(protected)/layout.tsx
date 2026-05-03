@@ -35,6 +35,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
     const user = session?.user;
     const router = useRouter();
     if (!user) {
+        console.log("Sem user")
         return null;
     }
     const { currentXp, xpPerLevel, percentage } = xpToNextLevel(user.xp);
@@ -57,7 +58,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                                 cn(
                                     "flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm transition-smooth",
                                     isActive
-                                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                        ? "bg-primary text-primary-foreground"
                                         : "text-sidebar-foreground hover:bg-sidebar-accent/60"
                                 )
                             }
@@ -70,7 +71,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                         </NavLink>
                     ))}
 
-                    {user.isAdmin && (
+                    {user.role === "ADMIN" && (
                         <NavLink
                             className={({ isActive }) =>
                                 cn(
@@ -119,7 +120,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                         className="mt-3 w-full justify-start"
                         onClick={async () => {
                             await authClient.signOut();
-                            router.replace("/login");
+                            router.push("/login");
                         }}
                         size="sm"
                         variant="ghost"
