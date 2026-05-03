@@ -9,7 +9,7 @@ import {
 import { toLessonType } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
-import { recalculateCourseProgress } from "../progress/progress.service.js";
+import { recalculateAllUserTrailsForCourse, recalculateCourseProgress } from "../progress/progress.service.js";
 import { lessonToResponse } from "./lesson.mapper.js";
 
 export function lessonRoutes(app: FastifyInstance) {
@@ -145,6 +145,12 @@ export function lessonRoutes(app: FastifyInstance) {
                     lesson.courseId
                 );
 
+                const trailProgress = await recalculateAllUserTrailsForCourse(
+                    tx,
+                    userId,
+                    lesson.courseId
+                );
+
                 await tx.userCourseProgress.upsert({
                     where: {
                         userId_courseId: {
@@ -172,6 +178,7 @@ export function lessonRoutes(app: FastifyInstance) {
                     progress: courseProgress.progress,
                     completed: courseProgress.completed,
                     unlockedAchievements: achievements.unlocked,
+                    trailProgress
                 };
             });
 

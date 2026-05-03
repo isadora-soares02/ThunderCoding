@@ -11,7 +11,7 @@ import { toAnswerKey, toDifficulty } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
 import { completeLinkedLessonFromQuestion } from "../progress/linked-session.service.js";
-import { recalculateCourseProgress } from "../progress/progress.service.js";
+import { recalculateAllUserTrailsForCourse, recalculateCourseProgress } from "../progress/progress.service.js";
 import { questionToResponse } from "./quiz.mapper.js";
 
 export function quizRoutes(app: FastifyInstance) {
@@ -138,6 +138,12 @@ export function quizRoutes(app: FastifyInstance) {
                     question.courseId
                 );
 
+                const trailProgress = await recalculateAllUserTrailsForCourse(
+                    tx,
+                    userId,
+                    question.courseId
+                );
+
                 const achievements = await syncUserAchievements(tx, userId);
 
                 return {
@@ -147,6 +153,7 @@ export function quizRoutes(app: FastifyInstance) {
                     progress: courseProgress.progress,
                     completed: courseProgress.completed,
                     unlockedAchievements: achievements.unlocked,
+                    trailProgress
                 };
             });
 

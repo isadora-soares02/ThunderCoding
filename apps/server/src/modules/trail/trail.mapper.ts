@@ -14,7 +14,7 @@ type TrailWithCourses = Trail & {
     >;
 };
 
-export function trailToResponse(trail: TrailWithCourses) {
+export function trailToResponse(trail: TrailWithCourses, userProgress?: number) {
     const orderedCourses = [...(trail.courses ?? [])].sort(
         (a, b) => a.order - b.order
     );
@@ -27,7 +27,7 @@ export function trailToResponse(trail: TrailWithCourses) {
         courseIds: orderedCourses.map((item) => item.courseId),
         courses: orderedCourses.map((item) => courseToResponse(item.course)),
         totalXp: trail.totalXp,
-        progress: trail.progress,
+        progress: userProgress ?? 0,
         status: fromCourseStatus(trail.status),
         color: trail.color ?? "primary",
         icon: trail.icon ?? "Sparkles",

@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
-import { requireAdmin } from "../../plugins/auth.js";
+import { getSession, requireAdmin } from "../../plugins/auth.js";
 import {
     createTrailSchema,
     trailQuerySchema,
@@ -15,24 +15,17 @@ export function trailRoutes(app: FastifyInstance) {
     app.get("/trails", async (request) => {
         const query = trailQuerySchema.parse(request.query);
 
+        const session = await getSession(request);
+        const userId = session?.user?.id;
+
         const trails = await prisma.trail.findMany({
             where: {
                 status: query.status ? toCourseStatus(query.status) : "PUBLISHED",
                 level: query.level ? toDifficulty(query.level) : undefined,
                 OR: query.search
                     ? [
-                        {
-                            name: {
-                                contains: query.search,
-                                mode: "insensitive",
-                            },
-                        },
-                        {
-                            description: {
-                                contains: query.search,
-                                mode: "insensitive",
-                            },
-                        },
+                        { name: { contains: query.search, mode: "insensitive" } },
+                        { description: { contains: query.search, mode: "insensitive" } },
                     ]
                     : undefined,
             },
@@ -46,6 +39,11 @@ export function trailRoutes(app: FastifyInstance) {
                                         lessons: true,
                                     },
                                 },
+                                progress: userId
+                                    ? {
+                                        where: { userId },
+                                    }
+                                    : false,
                             },
                         },
                     },
@@ -59,13 +57,39 @@ export function trailRoutes(app: FastifyInstance) {
             },
         });
 
+        const trailsWithProgress = await Promise.all(
+            trails.map((trail) => {
+                if (!userId) {
+                    return trailToResponse(trail, 0);
+                }
+
+                const total = trail.courses.length;
+
+                if (total === 0) {
+                    return trailToResponse(trail, 0);
+                }
+
+                const sum = trail.courses.reduce(
+                    (acc, item) => acc + (item.course.progress?.[0]?.progress ?? 0),
+                    0
+                );
+
+                const progresso = Math.round(sum / total);
+
+                return trailToResponse(trail, progresso);
+            })
+        );
+
         return {
-            trails: trails.map(trailToResponse),
+            trails: trailsWithProgress,
         };
     });
 
     app.get("/trails/:id", async (request, reply) => {
         const params = idParamSchema.parse(request.params);
+
+        const session = await getSession(request);
+        const userId = session?.user?.id;
 
         const trail = await prisma.trail.findUnique({
             where: {
@@ -86,6 +110,11 @@ export function trailRoutes(app: FastifyInstance) {
                                         lessons: true,
                                     },
                                 },
+                                progress: userId
+                                    ? {
+                                        where: { userId },
+                                    }
+                                    : false,
                             },
                         },
                     },
@@ -102,8 +131,17 @@ export function trailRoutes(app: FastifyInstance) {
             });
         }
 
+        const total = trail.courses.length;
+
+        const progresso =
+            userId && total > 0
+                ? Math.round(
+                    trail.courses.reduce((acc, item) => acc + (item.course.progress?.[0]?.progress ?? 0), 0) / total
+                )
+                : 0;
+
         return {
-            trail: trailToResponse(trail),
+            trail: trailToResponse(trail, progresso),
         };
     });
 

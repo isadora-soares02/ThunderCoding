@@ -9,12 +9,16 @@ import {
 } from "../../schemas/task.schema.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
-import { taskToResponse } from "./task.mapper.js";
-import { recalculateCourseProgress } from "../progress/progress.service.js";
 import { completeLinkedLessonFromTask } from "../progress/linked-session.service.js";
+import {
+    recalculateAllUserTrailsForCourse,
+    recalculateCourseProgress,
+} from "../progress/progress.service.js";
+import { taskToResponse } from "./task.mapper.js";
 
 export function taskRoutes(app: FastifyInstance) {
-    app.get("/courses/:courseId/tasks",
+    app.get(
+        "/courses/:courseId/tasks",
         {
             preHandler: requireAuth,
         },
@@ -44,9 +48,11 @@ export function taskRoutes(app: FastifyInstance) {
             return {
                 tasks: tasks.map(taskToResponse),
             };
-        });
+        }
+    );
 
-    app.get("/tasks/:id",
+    app.get(
+        "/tasks/:id",
         {
             preHandler: requireAuth,
         },
@@ -75,7 +81,8 @@ export function taskRoutes(app: FastifyInstance) {
             return {
                 task: taskToResponse(task),
             };
-        });
+        }
+    );
 
     app.post(
         "/tasks/:id/submit",
@@ -137,7 +144,7 @@ export function taskRoutes(app: FastifyInstance) {
                     },
                 });
 
-                await completeLinkedLessonFromTask(tx, userId, task.id)
+                await completeLinkedLessonFromTask(tx, userId, task.id);
 
                 const updatedUser = await tx.user.update({
                     where: { id: userId },
@@ -161,7 +168,13 @@ export function taskRoutes(app: FastifyInstance) {
                     tx,
                     userId,
                     task.courseId
-                )
+                );
+
+                const trailProgress = await recalculateAllUserTrailsForCourse(
+                    tx,
+                    userId,
+                    task.courseId
+                );
 
                 const achievements = await syncUserAchievements(tx, userId);
 
@@ -170,7 +183,8 @@ export function taskRoutes(app: FastifyInstance) {
                     level: levelData.level,
                     unlockedAchievements: achievements.unlocked,
                     completed: courseProgress.completed,
-                    progress: courseProgress.progress
+                    progress: courseProgress.progress,
+                    trailProgress,
                 };
             });
 
