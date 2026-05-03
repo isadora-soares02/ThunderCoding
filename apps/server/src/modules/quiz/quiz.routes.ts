@@ -95,6 +95,54 @@ export function quizRoutes(app: FastifyInstance) {
         }
     );
 
+    app.get("/questions/:id", async (request, reply) => {
+        const { id } = z.object({ id: z.string() }).parse(request.params);
+
+        const question = await prisma.question.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        if (!question) {
+            return reply.status(404).send({
+                message: "Pergunta não encontrada.",
+            });
+        }
+
+        return {
+            question: questionToResponse(question),
+        };
+    });
+
+    app.get("/quizzes/question/:id", async (request, reply) => {
+        const { id } = z.object({ id: z.string() }).parse(request.params);
+
+        const startQuestion = await prisma.question.findUnique({
+            where: { id },
+        });
+
+        if (!startQuestion) {
+            return reply.status(404).send({
+                message: "Quiz não encontrado.",
+            });
+        }
+
+        const questions = await prisma.question.findMany({
+            where: {
+                courseId: startQuestion.courseId,
+            },
+            orderBy: {
+                createdAt: "asc",
+            },
+        });
+
+        return {
+            startQuestion: questionToResponse(startQuestion),
+            questions: questions.map(questionToResponse),
+        };
+    });
+
     app.post(
         "/admin/questions",
         { preHandler: requireAdmin },
