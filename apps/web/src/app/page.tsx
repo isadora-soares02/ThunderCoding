@@ -2,10 +2,8 @@
 
 import { ArrowRight, Brain, Flame, Sparkles, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
 
 const features = [
   {
@@ -31,12 +29,6 @@ const features = [
 ];
 
 export default function Landing() {
-  const router = useRouter();
-  const { data: session } = useSession();
-  if (session?.user) {
-    return router.replace("/dashboard");
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <header className="container flex items-center justify-between py-5">

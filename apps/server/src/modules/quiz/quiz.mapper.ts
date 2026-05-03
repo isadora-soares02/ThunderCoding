@@ -3,8 +3,8 @@ import { fromAnswerKey, fromDifficulty } from "../../utils/enums.js";
 export function questionToResponse(question: any) {
     return {
         id: question.id,
-        courseId: question.cursoId,
-        question: question.pergunta,
+        courseId: question.courseId,
+        question: question.question,
         options: {
             a: question.optionA,
             b: question.optionB,

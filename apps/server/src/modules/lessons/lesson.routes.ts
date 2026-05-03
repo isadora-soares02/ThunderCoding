@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
-import { requireAdmin, requireAuth } from "../../plugins/auth.js";
+import { getSession, requireAdmin, requireAuth } from "../../plugins/auth.js";
 import {
     createLessonSchema,
     updateLessonSchema,
@@ -28,6 +28,44 @@ export function lessonRoutes(app: FastifyInstance) {
             lessons: lessons.map(lessonToResponse),
         };
     });
+
+    app.get(
+        "/lessons/:id",
+        {
+            preHandler: requireAuth,
+        },
+        async (request, reply) => {
+            const { id } = z.object({ id: z.string() }).parse(request.params);
+
+            const session = await getSession(request);
+            const userId = session?.user.id;
+
+            const lesson = await prisma.lesson.findUnique({
+                where: {
+                    id,
+                },
+                include: userId
+                    ? {
+                        progress: {
+                            where: {
+                                userId,
+                            },
+                        },
+                    }
+                    : undefined,
+            });
+
+            if (!lesson) {
+                return reply.status(404).send({
+                    message: "Aula não encontrada.",
+                });
+            }
+
+            return {
+                lesson: lessonToResponse(lesson),
+            };
+        }
+    );
 
     app.post(
         "/lessons/:id/complete",
@@ -154,31 +192,27 @@ export function lessonRoutes(app: FastifyInstance) {
         }
     );
 
-    app.post(
-        "/admin/lessons",
-        { preHandler: requireAdmin },
-        async (request) => {
-            const body = createLessonSchema.parse(request.body);
+    app.post("/admin/lessons", { preHandler: requireAdmin }, async (request) => {
+        const body = createLessonSchema.parse(request.body);
 
-            const lesson = await prisma.lesson.create({
-                data: {
-                    courseId: body.courseId,
-                    title: body.title,
-                    type: toLessonType(body.type),
-                    content: body.content,
-                    videoUrl: body.videoUrl || null,
-                    order: body.order,
-                    xp: body.xp,
-                    durationMin: body.durationMin,
-                },
-            });
+        const lesson = await prisma.lesson.create({
+            data: {
+                courseId: body.courseId,
+                title: body.title,
+                type: toLessonType(body.type),
+                content: body.content,
+                videoUrl: body.videoUrl || null,
+                order: body.order,
+                xp: body.xp,
+                durationMin: body.durationMin,
+            },
+        });
 
-            return {
-                message: "Aula criada com sucesso.",
-                lesson,
-            };
-        }
-    );
+        return {
+            message: "Aula criada com sucesso.",
+            lesson,
+        };
+    });
 
     app.patch(
         "/admin/lessons/:id",

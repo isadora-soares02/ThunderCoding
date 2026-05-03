@@ -1,14 +1,19 @@
-"use client";
-
 import Link, { type LinkProps } from "next/link";
 import { usePathname } from "next/navigation";
-import type { AnchorHTMLAttributes, RefObject } from "react";
+import type { AnchorHTMLAttributes, ReactNode, RefObject } from "react";
 import { cn } from "@/lib/utils";
+
+type NavLinkClassName = string | ((props: { isActive: boolean }) => string);
 
 interface NavLinkProps
     extends LinkProps,
-    Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> {
+    Omit<
+        AnchorHTMLAttributes<HTMLAnchorElement>,
+        keyof LinkProps | "className"
+    > {
     activeClassName?: string;
+    children?: ReactNode;
+    className?: NavLinkClassName;
     end?: boolean;
 }
 
@@ -21,7 +26,8 @@ const NavLink = ({
     ...props
 }: NavLinkProps & { ref?: RefObject<HTMLAnchorElement | null> }) => {
     const pathname = usePathname();
-    const hrefString = href.toString();
+
+    const hrefString = typeof href === "string" ? href : (href.pathname ?? "");
 
     const isActive = end
         ? pathname === hrefString
@@ -29,9 +35,12 @@ const NavLink = ({
             ? pathname === "/"
             : pathname === hrefString || pathname.startsWith(`${hrefString}/`);
 
+    const resolvedClassName =
+        typeof className === "function" ? className({ isActive }) : className;
+
     return (
         <Link
-            className={cn(className, isActive && activeClassName)}
+            className={cn(resolvedClassName, isActive && activeClassName)}
             href={href}
             ref={ref}
             {...props}

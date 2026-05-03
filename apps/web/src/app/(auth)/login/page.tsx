@@ -9,12 +9,11 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { type LoginInput, loginSchema } from "@/schemas";
 
 export default function LoginPage() {
     const router = useRouter();
-    const { data: session } = useSession();
 
     const {
         register,
@@ -24,16 +23,17 @@ export default function LoginPage() {
         resolver: zodResolver(loginSchema),
     });
 
-    if (session?.user) {
-        return router.replace("/dashboard");
-    }
-
     const onSubmit = async (data: LoginInput) => {
         try {
-            await authClient.signIn.email({
+            const { error } = await authClient.signIn.email({
                 email: data.email,
                 password: data.password,
             });
+
+            if (error) {
+                toast.error(error.message)
+                return;
+            }
 
             toast.success("Bem-vindo de volta!");
             router.replace("/dashboard");

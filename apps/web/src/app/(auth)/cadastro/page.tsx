@@ -9,12 +9,11 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { type RegisterInput, registerSchema } from "@/schemas";
 
 export default function Register() {
     const router = useRouter();
-    const { data: session } = useSession();
 
     const {
         register,
@@ -23,10 +22,6 @@ export default function Register() {
     } = useForm<RegisterInput>({
         resolver: zodResolver(registerSchema),
     });
-
-    if (session?.user) {
-        return router.replace("/dashboard");
-    }
 
     const onSubmit = async (data: RegisterInput) => {
         try {
