@@ -55,10 +55,11 @@ model User {
   completedCourses Int       @default(0)
   lastStudyDate    DateTime?
 
-  courseProgress UserCourseProgress[]
-  lessonProgress UserLessonProgress[]
-  achievements   UserAchievement[]
-  taskProgress   UserTaskProgress[]
+  courseProgress   UserCourseProgress[]
+  lessonProgress   UserLessonProgress[]
+  achievements     UserAchievement[]
+  taskProgress     UserTaskProgress[]
+  questionProgress UserQuestionProgress[]
 
   @@map("user")
 }
@@ -66,7 +67,7 @@ model User {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String   @unique
+  token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -198,7 +199,8 @@ model Question {
   xp          Int
   difficulty  Difficulty
 
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress UserQuestionProgress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -307,4 +309,23 @@ model UserTaskProgress {
 
   @@unique([userId, taskId])
   @@map("userTaskProgress")
+}
+
+model UserQuestionProgress {
+  id         String     @id @default(uuid())
+  userId     String
+  questionId String
+  completed  Boolean    @default(false)
+  correct    Boolean    @default(false)
+  answer     AnswerKey?
+  xpEarned   Int        @default(0)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, questionId])
+  @@map("userQuestionProgress")
 }

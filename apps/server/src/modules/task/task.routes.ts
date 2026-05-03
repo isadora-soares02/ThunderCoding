@@ -10,6 +10,7 @@ import {
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
 import { taskToResponse } from "./task.mapper.js";
+import { recalculateCourseProgress } from "../progress/progress.service.js";
 
 export function taskRoutes(app: FastifyInstance) {
     app.get("/courses/:courseId/tasks",
@@ -153,18 +154,25 @@ export function taskRoutes(app: FastifyInstance) {
                     },
                 });
 
+                const courseProgress = await recalculateCourseProgress(
+                    tx,
+                    userId,
+                    task.courseId
+                )
+
                 const achievements = await syncUserAchievements(tx, userId);
 
                 return {
                     xpEarned: task.xp,
                     level: levelData.level,
                     unlockedAchievements: achievements.unlocked,
+                    completed: courseProgress.completed,
+                    progress: courseProgress.progress
                 };
             });
 
             return {
                 message: "Parabéns, missão concluída!",
-                completed: true,
                 ...result,
             };
         }

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
-import { requireAdmin, requireAuth } from "../../plugins/auth.js";
+import { getSession, requireAdmin, requireAuth } from "../../plugins/auth.js";
 import {
     answerQuestionSchema,
     createQuestionSchema,
@@ -10,6 +10,7 @@ import {
 import { toAnswerKey, toDifficulty } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
+import { recalculateCourseProgress } from "../progress/progress.service.js";
 import { questionToResponse } from "./quiz.mapper.js";
 
 export function quizRoutes(app: FastifyInstance) {
@@ -18,10 +19,20 @@ export function quizRoutes(app: FastifyInstance) {
             .object({ courseId: z.string() })
             .parse(request.params);
 
+        const session = await getSession(request)
+        const userId = session?.user.id
+
         const questions = await prisma.question.findMany({
             where: {
                 courseId,
             },
+            include: userId ? {
+                progress: {
+                    where: {
+                        userId
+                    }
+                }
+            } : undefined
         });
 
         return {
@@ -51,14 +62,51 @@ export function quizRoutes(app: FastifyInstance) {
 
             const acertou = resposta === correta;
 
+            const previous = await prisma.userQuestionProgress.findUnique({
+                where: {
+                    userId_questionId: {
+                        userId,
+                        questionId: question.id,
+                    },
+                },
+            });
+
+            if (previous?.completed) {
+                return {
+                    correct: previous.correct,
+                    xpEarned: 0,
+                    alreadyAnswered: true,
+                    correctAnswer: question.correct.toLowerCase(),
+                    explanation: question.explanation,
+                    message: "Pergunta já respondida. Revisão liberada, mas sem novo XP.",
+                };
+            }
+
             const result = await prisma.$transaction(async (tx) => {
                 let xpEarned = 0;
 
                 if (acertou) {
                     xpEarned = question.xp;
+                }
 
-                    const user = await tx.user.update({
-                        where: { id: userId },
+                await tx.userQuestionProgress.create({
+                    data: {
+                        userId,
+                        questionId: question.id,
+                        completed: true,
+                        correct: acertou,
+                        answer: resposta,
+                        xpEarned,
+                    },
+                });
+
+                let nivel = 1;
+
+                if (xpEarned > 0) {
+                    const updatedUser = await tx.user.update({
+                        where: {
+                            id: userId,
+                        },
                         data: {
                             xp: {
                                 increment: xpEarned,
@@ -66,31 +114,42 @@ export function quizRoutes(app: FastifyInstance) {
                         },
                     });
 
-                    const nivelData = calculateLevel(user.xp);
+                    const nivelData = calculateLevel(updatedUser.xp);
+                    nivel = nivelData.level;
 
                     await tx.user.update({
-                        where: { id: userId },
+                        where: {
+                            id: userId,
+                        },
                         data: {
-                            level: nivelData.level,
+                            level: nivel,
                         },
                     });
                 }
 
+                const courseProgress = await recalculateCourseProgress(
+                    tx,
+                    userId,
+                    question.courseId
+                );
+
                 const achievements = await syncUserAchievements(tx, userId);
 
                 return {
-                    acertou,
+                    correct: acertou,
                     xpEarned,
+                    level: nivel,
+                    progress: courseProgress.progress,
+                    completed: courseProgress.completed,
                     unlockedAchievements: achievements.unlocked,
                 };
             });
 
             return {
-                correct: result.acertou,
-                xpEarned: result.xpEarned,
-                unlockedAchievements: result.unlockedAchievements,
+                ...result,
                 correctAnswer: question.correct.toLowerCase(),
                 explanation: question.explanation,
+                alreadyAnswered: false,
             };
         }
     );
@@ -98,10 +157,20 @@ export function quizRoutes(app: FastifyInstance) {
     app.get("/questions/:id", async (request, reply) => {
         const { id } = z.object({ id: z.string() }).parse(request.params);
 
+        const session = await getSession(request)
+        const userId = session?.user.id
+
         const question = await prisma.question.findUnique({
             where: {
                 id,
             },
+            include: userId ? {
+                progress: {
+                    where: {
+                        userId
+                    }
+                }
+            } : undefined
         });
 
         if (!question) {

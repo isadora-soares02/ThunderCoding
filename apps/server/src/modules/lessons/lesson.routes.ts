@@ -9,6 +9,7 @@ import {
 import { toLessonType } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
+import { recalculateCourseProgress } from "../progress/progress.service.js";
 import { lessonToResponse } from "./lesson.mapper.js";
 
 export function lessonRoutes(app: FastifyInstance) {
@@ -138,23 +139,11 @@ export function lessonRoutes(app: FastifyInstance) {
                     },
                 });
 
-                const totalLessons = await tx.lesson.count({
-                    where: {
-                        courseId: lesson.courseId,
-                    },
-                });
-
-                const completedLessons = await tx.userLessonProgress.count({
-                    where: {
-                        userId,
-                        lesson: {
-                            courseId: lesson.courseId,
-                        },
-                        completed: true,
-                    },
-                });
-
-                const progress = Math.round((completedLessons / totalLessons) * 100);
+                const courseProgress = await recalculateCourseProgress(
+                    tx,
+                    userId,
+                    lesson.courseId
+                );
 
                 await tx.userCourseProgress.upsert({
                     where: {
@@ -164,14 +153,14 @@ export function lessonRoutes(app: FastifyInstance) {
                         },
                     },
                     update: {
-                        progress,
-                        completed: progress === 100,
+                        progress: courseProgress.progress,
+                        completed: courseProgress.completed,
                     },
                     create: {
                         userId,
                         courseId: lesson.courseId,
-                        progress,
-                        completed: progress === 100,
+                        progress: courseProgress.progress,
+                        completed: courseProgress.completed,
                     },
                 });
 
@@ -180,7 +169,8 @@ export function lessonRoutes(app: FastifyInstance) {
                 return {
                     xpEarned: lesson.xp,
                     level: nivelData.level,
-                    progress,
+                    progress: courseProgress.progress,
+                    completed: courseProgress.completed,
                     unlockedAchievements: achievements.unlocked,
                 };
             });
