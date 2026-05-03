@@ -12,63 +12,71 @@ import { syncUserAchievements } from "../achievement/achievement.service.js";
 import { taskToResponse } from "./task.mapper.js";
 
 export function taskRoutes(app: FastifyInstance) {
-    app.get("/courses/:courseId/tasks", async (request) => {
-        const { courseId } = z
-            .object({ courseId: z.string() })
-            .parse(request.params);
+    app.get("/courses/:courseId/tasks",
+        {
+            preHandler: requireAuth,
+        },
+        async (request) => {
+            const { courseId } = z
+                .object({ courseId: z.string() })
+                .parse(request.params);
 
-        const userId = request.user!.id;
+            const userId = request.user!.id;
 
-        const tasks = await prisma.task.findMany({
-            where: {
-                courseId,
-            },
-            include: userId
-                ? {
-                    progress: {
-                        where: { userId },
-                    },
-                }
-                : undefined,
-            orderBy: {
-                createdAt: "asc",
-            },
-        });
-
-        return {
-            tasks: tasks.map(taskToResponse),
-        };
-    });
-
-    app.get("/api/tasks/:id", async (request, reply) => {
-        const { id } = z.object({ id: z.string() }).parse(request.params);
-
-        const userId = request.user!.id;
-
-        const task = await prisma.task.findUnique({
-            where: { id },
-            include: userId
-                ? {
-                    progress: {
-                        where: { userId },
-                    },
-                }
-                : undefined,
-        });
-
-        if (!task) {
-            return reply.status(404).send({
-                message: "Tarefa não encontrada.",
+            const tasks = await prisma.task.findMany({
+                where: {
+                    courseId,
+                },
+                include: userId
+                    ? {
+                        progress: {
+                            where: { userId },
+                        },
+                    }
+                    : undefined,
+                orderBy: {
+                    createdAt: "asc",
+                },
             });
-        }
 
-        return {
-            task: taskToResponse(task),
-        };
-    });
+            return {
+                tasks: tasks.map(taskToResponse),
+            };
+        });
+
+    app.get("/tasks/:id",
+        {
+            preHandler: requireAuth,
+        },
+        async (request, reply) => {
+            const { id } = z.object({ id: z.string() }).parse(request.params);
+
+            const userId = request.user!.id;
+
+            const task = await prisma.task.findUnique({
+                where: { id },
+                include: userId
+                    ? {
+                        progress: {
+                            where: { userId },
+                        },
+                    }
+                    : undefined,
+            });
+
+            if (!task) {
+                return reply.status(404).send({
+                    message: "Tarefa não encontrada.",
+                });
+            }
+
+            return {
+                task: taskToResponse(task),
+            };
+        });
 
     app.post(
-        "/api/tasks/:id/submit",
+        "/tasks/:id/submit",
         {
             preHandler: requireAuth,
         },
@@ -163,7 +171,7 @@ export function taskRoutes(app: FastifyInstance) {
     );
 
     app.post(
-        "/api/admin/tasks",
+        "/admin/tasks",
         {
             preHandler: requireAdmin,
         },
@@ -190,7 +198,7 @@ export function taskRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/tasks/:id",
+        "/admin/tasks/:id",
         {
             preHandler: requireAdmin,
         },
@@ -219,7 +227,7 @@ export function taskRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/tasks/:id",
+        "/admin/tasks/:id",
         {
             preHandler: requireAdmin,
         },

@@ -118,7 +118,7 @@ export function dashboardRoutes(app: FastifyInstance) {
                 xpPerLevel: nivelData.xpPerLevel,
                 levelProgressPercentage: nivelData.percentage,
             },
-            resumo: {
+            resume: {
                 totalCourses,
                 completedCourses,
                 coursesInProgress: coursesInProgress.length,

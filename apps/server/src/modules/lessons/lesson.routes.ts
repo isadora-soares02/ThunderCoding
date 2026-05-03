@@ -30,7 +30,7 @@ export function lessonRoutes(app: FastifyInstance) {
     });
 
     app.post(
-        "/api/lessons/:id/complete",
+        "/lessons/:id/complete",
         {
             preHandler: requireAuth,
         },
@@ -155,7 +155,7 @@ export function lessonRoutes(app: FastifyInstance) {
     );
 
     app.post(
-        "/api/admin/lessons",
+        "/admin/lessons",
         { preHandler: requireAdmin },
         async (request) => {
             const body = createLessonSchema.parse(request.body);
@@ -181,7 +181,7 @@ export function lessonRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/lessons/:id",
+        "/admin/lessons/:id",
         { preHandler: requireAdmin },
         async (request) => {
             const { id } = z.object({ id: z.string() }).parse(request.params);
@@ -208,7 +208,7 @@ export function lessonRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/lessons/:id",
+        "/admin/lessons/:id",
         { preHandler: requireAdmin },
         async (request) => {
             const { id } = z.object({ id: z.string() }).parse(request.params);

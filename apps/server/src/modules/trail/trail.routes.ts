@@ -64,7 +64,7 @@ export function trailRoutes(app: FastifyInstance) {
         };
     });
 
-    app.get("/api/trails/:id", async (request, reply) => {
+    app.get("/trails/:id", async (request, reply) => {
         const params = idParamSchema.parse(request.params);
 
         const trail = await prisma.trail.findUnique({
@@ -108,7 +108,7 @@ export function trailRoutes(app: FastifyInstance) {
     });
 
     app.post(
-        "/api/admin/trails",
+        "/admin/trails",
         {
             preHandler: requireAdmin,
         },
@@ -146,7 +146,7 @@ export function trailRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/trails/:id",
+        "/admin/trails/:id",
         {
             preHandler: requireAdmin,
         },
@@ -208,7 +208,7 @@ export function trailRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/trails/:id",
+        "/admin/trails/:id",
         {
             preHandler: requireAdmin,
         },

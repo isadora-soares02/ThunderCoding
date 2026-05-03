@@ -73,7 +73,7 @@ export function courseRoutes(app: FastifyInstance) {
         };
     });
 
-    app.get("/api/courses/:id", async (request, reply) => {
+    app.get("/courses/:id", async (request, reply) => {
         const params = zIdParam(request.params);
         const session = await getSession(request);
         const userId = session?.user?.id;
@@ -138,7 +138,7 @@ export function courseRoutes(app: FastifyInstance) {
     });
 
     app.post(
-        "/api/admin/courses",
+        "/admin/courses",
         {
             preHandler: requireAdmin,
         },
@@ -175,7 +175,7 @@ export function courseRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/courses/:id",
+        "/admin/courses/:id",
         {
             preHandler: requireAdmin,
         },
@@ -216,7 +216,7 @@ export function courseRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/courses/:id",
+        "/admin/courses/:id",
         {
             preHandler: requireAdmin,
         },

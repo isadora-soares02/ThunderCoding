@@ -46,7 +46,7 @@ export function achievementRoutes(app: FastifyInstance) {
     );
 
     app.post(
-        "/api/admin/achievements",
+        "/admin/achievements",
         {
             preHandler: requireAdmin,
         },
@@ -72,7 +72,7 @@ export function achievementRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/achievements/:id",
+        "/admin/achievements/:id",
         {
             preHandler: requireAdmin,
         },
@@ -100,7 +100,7 @@ export function achievementRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/achievements/:id",
+        "/admin/achievements/:id",
         {
             preHandler: requireAdmin,
         },

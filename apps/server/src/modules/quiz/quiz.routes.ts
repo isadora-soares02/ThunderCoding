@@ -30,7 +30,7 @@ export function quizRoutes(app: FastifyInstance) {
     });
 
     app.post(
-        "/api/quizzes/answer",
+        "/quizzes/answer",
         { preHandler: requireAuth },
         async (request, reply) => {
             const body = answerQuestionSchema.parse(request.body);
@@ -96,7 +96,7 @@ export function quizRoutes(app: FastifyInstance) {
     );
 
     app.post(
-        "/api/admin/questions",
+        "/admin/questions",
         { preHandler: requireAdmin },
         async (request) => {
             const body = createQuestionSchema.parse(request.body);
@@ -124,7 +124,7 @@ export function quizRoutes(app: FastifyInstance) {
     );
 
     app.patch(
-        "/api/admin/questions/:id",
+        "/admin/questions/:id",
         { preHandler: requireAdmin },
         async (request) => {
             const { id } = z.object({ id: z.string() }).parse(request.params);
@@ -155,7 +155,7 @@ export function quizRoutes(app: FastifyInstance) {
     );
 
     app.delete(
-        "/api/admin/questions/:id",
+        "/admin/questions/:id",
         { preHandler: requireAdmin },
         async (request) => {
             const { id } = z.object({ id: z.string() }).parse(request.params);
