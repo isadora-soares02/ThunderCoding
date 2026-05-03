@@ -10,57 +10,24 @@ export async function recalculateCourseProgress(
     userId: string,
     courseId: string
 ) {
-    const [totalLessons, totalTasks, totalQuestions] = await Promise.all([
-        tx.lesson.count({
-            where: { courseId },
-        }),
-        tx.task.count({
-            where: { courseId },
-        }),
-        tx.question.count({
-            where: { courseId },
-        }),
-    ]);
+    const totalLessons = await tx.lesson.count({
+        where: { courseId },
+    });
 
-    const [completedLessons, completedTasks, completedQuestions] =
-        await Promise.all([
-            tx.userLessonProgress.count({
-                where: {
-                    userId,
-                    completed: true,
-                    lesson: {
-                        courseId,
-                    },
-                },
-            }),
-            tx.userTaskProgress.count({
-                where: {
-                    userId,
-                    completed: true,
-                    task: {
-                        courseId,
-                    },
-                },
-            }),
-            tx.userQuestionProgress.count({
-                where: {
-                    userId,
-                    completed: true,
-                    question: {
-                        courseId,
-                    },
-                },
-            }),
-        ]);
-
-    const totalActivities = totalLessons + totalTasks + totalQuestions;
-    const completedActivities =
-        completedLessons + completedTasks + completedQuestions;
+    const completedLessons = await tx.userLessonProgress.count({
+        where: {
+            userId,
+            completed: true,
+            lesson: {
+                courseId,
+            },
+        },
+    });
 
     const progress =
-        totalActivities === 0
+        totalLessons === 0
             ? 0
-            : Math.round((completedActivities / totalActivities) * 100);
+            : Math.round((completedLessons / totalLessons) * 100);
 
     const completed = progress >= 100;
 
@@ -83,26 +50,11 @@ export async function recalculateCourseProgress(
         },
     });
 
-    if (completed) {
-        const completedCourses = await tx.userCourseProgress.count({
-            where: {
-                userId,
-                completed: true,
-            },
-        });
-
-        await tx.user.update({
-            where: { id: userId },
-            data: {
-                completedCourses,
-            },
-        });
-    }
-
     return {
         progress,
         completed,
-        totalActivities,
-        completedActivities,
+        totalActivities: totalLessons,
+        completedActivities: completedLessons,
     };
 }
+

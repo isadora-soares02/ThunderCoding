@@ -9,7 +9,9 @@ export const createLessonSchema = z.object({
     order: z.coerce.number().int().nonnegative(),
     xp: z.coerce.number().int().positive(),
     durationMin: z.coerce.number().int().positive().default(5),
-});
+    taskId: z.string().optional().nullable(),
+    questionId: z.string().optional().nullable()
+})
 
 export const updateLessonSchema = createLessonSchema.partial();
 

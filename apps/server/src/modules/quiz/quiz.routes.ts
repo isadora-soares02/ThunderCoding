@@ -10,6 +10,7 @@ import {
 import { toAnswerKey, toDifficulty } from "../../utils/enums.js";
 import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
+import { completeLinkedLessonFromQuestion } from "../progress/linked-session.service.js";
 import { recalculateCourseProgress } from "../progress/progress.service.js";
 import { questionToResponse } from "./quiz.mapper.js";
 
@@ -19,20 +20,22 @@ export function quizRoutes(app: FastifyInstance) {
             .object({ courseId: z.string() })
             .parse(request.params);
 
-        const session = await getSession(request)
-        const userId = session?.user.id
+        const session = await getSession(request);
+        const userId = session?.user.id;
 
         const questions = await prisma.question.findMany({
             where: {
                 courseId,
             },
-            include: userId ? {
-                progress: {
-                    where: {
-                        userId
-                    }
+            include: userId
+                ? {
+                    progress: {
+                        where: {
+                            userId,
+                        },
+                    },
                 }
-            } : undefined
+                : undefined,
         });
 
         return {
@@ -100,6 +103,8 @@ export function quizRoutes(app: FastifyInstance) {
                     },
                 });
 
+                await completeLinkedLessonFromQuestion(tx, userId, question.id);
+
                 let nivel = 1;
 
                 if (xpEarned > 0) {
@@ -157,20 +162,22 @@ export function quizRoutes(app: FastifyInstance) {
     app.get("/questions/:id", async (request, reply) => {
         const { id } = z.object({ id: z.string() }).parse(request.params);
 
-        const session = await getSession(request)
-        const userId = session?.user.id
+        const session = await getSession(request);
+        const userId = session?.user.id;
 
         const question = await prisma.question.findUnique({
             where: {
                 id,
             },
-            include: userId ? {
-                progress: {
-                    where: {
-                        userId
-                    }
+            include: userId
+                ? {
+                    progress: {
+                        where: {
+                            userId,
+                        },
+                    },
                 }
-            } : undefined
+                : undefined,
         });
 
         if (!question) {

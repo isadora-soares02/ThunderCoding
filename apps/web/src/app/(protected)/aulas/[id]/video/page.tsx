@@ -1,21 +1,10 @@
 "use client";
 
-import {
-    ArrowLeft,
-    ArrowRight,
-    CheckCircle2,
-    Maximize2,
-    Pause,
-    Play,
-    Video,
-    Volume2,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Video } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
-import { ProgressBar } from "@/components/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,9 +19,6 @@ export default function LessonVideo() {
     const params = useParams<{ id: string }>();
     const id = params.id;
     const router = useRouter();
-
-    const [playing, setPlaying] = useState(false);
-    const [progress, setProgress] = useState(35);
 
     const lessonQuery = useLesson(id);
     const lesson = lessonQuery.data?.lesson;
@@ -67,17 +53,48 @@ export default function LessonVideo() {
 
         completeLesson.mutate(undefined, {
             onSuccess: (data) => {
-                setProgress(100);
-                toast.success(`Você ganhou ${data.xpGanho} XP! ⚡`);
+                toast.success(`Você ganhou ${data.xpEarned} XP! ⚡`);
 
-                if (data.conquistasDesbloqueadas.length > 0) {
+                if (data.unlockedAchievements.length > 0) {
                     toast.success(
-                        `Conquista desbloqueada: ${data.conquistasDesbloqueadas.join(", ")}`
+                        `Conquista desbloqueada: ${data.unlockedAchievements.join(", ")}`
                     );
                 }
             },
         });
     };
+
+    const getLessonHref = (item: (typeof list)[number]) => {
+        if (item.type === "vídeo") {
+            return `/aulas/${item.id}/video`;
+        }
+        if (item.type === "quiz") {
+            return `/quiz/${item.questionId}`;
+        }
+        if (item.type === "tarefa") {
+            return `/tarefas/${item.taskId}`;
+        }
+
+        return `/aulas/${item.id}`;
+    };
+
+    const getYouTubeEmbedUrl = (url?: string | null) => {
+        if (!url) {
+            return null;
+        }
+
+        const videoId =
+            url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)?.[1] ??
+            null;
+
+        if (!videoId) {
+            return null;
+        }
+
+        return `https://www.youtube.com/embed/${videoId}`;
+    };
+
+    const embedUrl = getYouTubeEmbedUrl(lesson.videoUrl);
 
     return (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -89,42 +106,20 @@ export default function LessonVideo() {
                 </Button>
 
                 <Card className="overflow-hidden">
-                    <div className="relative flex aspect-video items-center justify-center bg-foreground">
-                        <div className="absolute inset-0 bg-gradient-hero opacity-40" />
-
-                        <button
-                            aria-label={playing ? "Pausar" : "Reproduzir"}
-                            className="relative grid h-20 w-20 place-items-center rounded-full bg-white/95 text-primary shadow-glow transition-bounce hover:scale-110"
-                            onClick={() => setPlaying((p) => !p)}
-                        >
-                            {playing ? (
-                                <Pause size={28} />
-                            ) : (
-                                <Play className="ml-1" size={28} />
-                            )}
-                        </button>
-                    </div>
-
-                    <div className="space-y-2 px-4 py-3">
-                        <ProgressBar className="h-1.5" gradient value={progress} />
-
-                        <div className="flex items-center justify-between text-muted-foreground text-xs">
-                            <div className="flex items-center gap-2">
-                                <button
-                                    aria-label={playing ? "Pausar" : "Reproduzir"}
-                                    onClick={() => setPlaying((p) => !p)}
-                                >
-                                    {playing ? <Pause size={14} /> : <Play size={14} />}
-                                </button>
-
-                                <Volume2 size={14} />
-                                <span>02:15 / {lesson.durationMin}:00</span>
+                    <div className="relative aspect-video overflow-hidden bg-foreground">
+                        {embedUrl ? (
+                            <iframe
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                className="h-full w-full"
+                                src={embedUrl}
+                                title={lesson.title}
+                            />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-background">
+                                Vídeo indisponível
                             </div>
-
-                            <button aria-label="Tela cheia">
-                                <Maximize2 size={14} />
-                            </button>
-                        </div>
+                        )}
                     </div>
                 </Card>
 
@@ -154,13 +149,7 @@ export default function LessonVideo() {
 
                         {next && (
                             <Button
-                                onClick={() =>
-                                    router.replace(
-                                        next.type === "video"
-                                            ? `/aulas/${next.id}/video`
-                                            : `/aulas/${next.id}`
-                                    )
-                                }
+                                onClick={() => router.replace(getLessonHref(next))}
                                 variant="outline"
                             >
                                 Próxima aula <ArrowRight size={16} />

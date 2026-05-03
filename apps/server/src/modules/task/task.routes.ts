@@ -11,6 +11,7 @@ import { calculateLevel } from "../../utils/xp.js";
 import { syncUserAchievements } from "../achievement/achievement.service.js";
 import { taskToResponse } from "./task.mapper.js";
 import { recalculateCourseProgress } from "../progress/progress.service.js";
+import { completeLinkedLessonFromTask } from "../progress/linked-session.service.js";
 
 export function taskRoutes(app: FastifyInstance) {
     app.get("/courses/:courseId/tasks",
@@ -135,6 +136,8 @@ export function taskRoutes(app: FastifyInstance) {
                         answer: body.answer,
                     },
                 });
+
+                await completeLinkedLessonFromTask(tx, userId, task.id)
 
                 const updatedUser = await tx.user.update({
                     where: { id: userId },

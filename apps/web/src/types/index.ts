@@ -1,6 +1,6 @@
 export type Difficulty = "Iniciante" | "Intermediário" | "Avançado";
 export type CourseStatus = "rascunho" | "publicado";
-export type LessonType = "text" | "video" | "assignment" | "quiz";
+export type LessonType = "texto" | "vídeo" | "tarefa" | "quiz";
 
 export interface User {
     avatarUrl?: string;
@@ -21,6 +21,8 @@ export interface Lesson {
     durationMin: number;
     id: string;
     order: number;
+    questionId?: string | null;
+    taskId?: string | null;
     title: string;
     type: LessonType;
     videoUrl?: string;
@@ -57,7 +59,10 @@ export interface Trail {
 }
 
 export interface Question {
-    correct: "A" | "B" | "C" | "D";
+    answer?: "a" | "b" | "c" | "d";
+    completed?: boolean;
+    correct?: boolean;
+    correctAnswer: "a" | "b" | "c" | "d";
     courseId: string;
     difficulty: Difficulty;
     explanation: string;
@@ -65,9 +70,12 @@ export interface Question {
     options: { A: string; B: string; C: string; D: string };
     question: string;
     xp: number;
+    xpEarned?: number;
 }
 
 export interface Task {
+    answer?: string;
+    completed?: boolean;
     courseId: string;
     description: string;
     estimatedTime: string;

@@ -195,6 +195,8 @@ export function lessonRoutes(app: FastifyInstance) {
                 order: body.order,
                 xp: body.xp,
                 durationMin: body.durationMin,
+                taskId: body.type === "tarefa" ? body.taskId : null,
+                questionId: body.type === "quiz" ? body.questionId : null,
             },
         });
 
@@ -221,6 +223,18 @@ export function lessonRoutes(app: FastifyInstance) {
                     order: body.order,
                     xp: body.xp,
                     durationMin: body.durationMin,
+                    taskId:
+                        body.type === "tarefa"
+                            ? body.taskId
+                            : body.type
+                                ? null
+                                : body.taskId,
+                    questionId:
+                        body.type === "quiz"
+                            ? body.questionId
+                            : body.type
+                                ? null
+                                : body.questionId,
                 },
             });
 

@@ -120,18 +120,7 @@ export function courseRoutes(app: FastifyInstance) {
 
         return {
             course: courseToResponse(course),
-            lessons: course.lessons.map((lesson) => ({
-                id: lesson.id,
-                courseId: lesson.courseId,
-                title: lesson.title,
-                type: lesson.type.toLowerCase(),
-                content: lesson.content,
-                videoUrl: lesson.videoUrl ?? "",
-                order: lesson.order,
-                xp: lesson.xp,
-                durationMin: lesson.durationMin,
-                completed: lesson.progress?.[0]?.completed ?? false,
-            })),
+            lessons: course.lessons.map((lesson) => lessonToResponse(lesson)),
             totalQuestions: course.questions.length,
             totalTasks: course.tasks.length,
         };
@@ -240,4 +229,5 @@ function zIdParam(params: unknown) {
     return z.object({ id: z.string().min(1) }).parse(params);
 }
 
-import { z } from "zod";
+import { z } from "zod"; import { lessonToResponse } from "../lessons/lesson.mapper";
+

@@ -67,15 +67,29 @@ export default function LessonView() {
 
         completeLesson.mutate(undefined, {
             onSuccess: (data) => {
-                toast.success(`Você ganhou ${data.xpGanho} XP! ⚡`);
+                toast.success(`Você ganhou ${data.xpEarned} XP! ⚡`);
 
-                if (data.conquistasDesbloqueadas.length > 0) {
+                if (data.unlockedAchievements.length > 0) {
                     toast.success(
-                        `Conquista desbloqueada: ${data.conquistasDesbloqueadas.join(", ")}`
+                        `Conquista desbloqueada: ${data.unlockedAchievements.join(", ")}`
                     );
                 }
             },
         });
+    };
+
+    const getLessonHref = (item: (typeof list)[number]) => {
+        if (item.type === "vídeo") {
+            return `/aulas/${item.id}/video`;
+        }
+        if (item.type === "quiz") {
+            return `/quiz/${item.questionId}`;
+        }
+        if (item.type === "tarefa") {
+            return `/tarefas/${item.taskId}`;
+        }
+
+        return `/aulas/${item.id}`;
     };
 
     return (
@@ -103,19 +117,6 @@ export default function LessonView() {
                         {lesson.content}
                     </article>
 
-                    <Card className="border-dashed bg-muted/40 p-4">
-                        <p className="mb-2 text-muted-foreground text-xs uppercase tracking-wider">
-                            Exemplo
-                        </p>
-                        <pre className="overflow-x-auto rounded-xl bg-foreground p-4 text-background text-xs">
-                            <code>{`function somar(a: number, b: number): number {
-  return a + b;
-}
-
-console.log(somar(2, 3)); // 5`}</code>
-                        </pre>
-                    </Card>
-
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <Button
                             className={cn(!done && "shadow-glow")}
@@ -134,7 +135,7 @@ console.log(somar(2, 3)); // 5`}</code>
                         <div className="flex gap-2">
                             <Button
                                 disabled={!prev}
-                                onClick={() => prev && router.replace(`/aulas/${prev.id}`)}
+                                onClick={() => prev && router.replace(getLessonHref(prev))}
                                 variant="outline"
                             >
                                 <ArrowLeft size={16} /> Aula anterior
@@ -142,7 +143,7 @@ console.log(somar(2, 3)); // 5`}</code>
 
                             <Button
                                 disabled={!next}
-                                onClick={() => next && router.replace(`/aulas/${next.id}`)}
+                                onClick={() => next && router.replace(getLessonHref(next))}
                             >
                                 Próxima aula <ArrowRight size={16} />
                             </Button>
@@ -167,11 +168,7 @@ console.log(somar(2, 3)); // 5`}</code>
                                             ? "bg-primary/10 font-semibold text-primary"
                                             : "hover:bg-muted"
                                     )}
-                                    href={
-                                        l.type === "video"
-                                            ? `/aulas/${l.id}/video`
-                                            : `/aulas/${l.id}`
-                                    }
+                                    href={getLessonHref(l)}
                                 >
                                     <span
                                         className={cn(

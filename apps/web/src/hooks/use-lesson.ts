@@ -11,11 +11,11 @@ interface LessonsResponse {
 }
 
 interface CompleteLessonResponse {
-    conquistasDesbloqueadas: string[];
+    level: number;
     message: string;
-    nivel: number;
-    progresso: number;
-    xpGanho: number;
+    progress: number;
+    unlockedAchievements: string[];
+    xpEarned: number;
 }
 
 export function useLesson(id?: string) {
@@ -35,21 +35,25 @@ export function useCourseLessons(courseId?: string) {
     });
 }
 
-export function useCompleteLesson(id?: string, courseId?: string) {
+export function useCompleteLesson(id?: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: () =>
             apiFetch<CompleteLessonResponse>(`/api/lessons/${id}/complete`, {
                 method: "POST",
+                body: JSON.stringify({}),
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lesson", id] });
-            queryClient.invalidateQueries({ queryKey: ["course-lessons", courseId] });
-            queryClient.invalidateQueries({ queryKey: ["course", courseId] });
             queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-            queryClient.invalidateQueries({ queryKey: ["achievements"] });
             queryClient.invalidateQueries({ queryKey: ["profile"] });
+            queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["course"] });
+            queryClient.invalidateQueries({ queryKey: ["course-lessons"] });
+            queryClient.invalidateQueries({ queryKey: ["course-tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["course-questions"] });
+            queryClient.invalidateQueries({ queryKey: ["achievements"] });
         },
     });
 }

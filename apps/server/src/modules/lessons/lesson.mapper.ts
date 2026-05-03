@@ -12,5 +12,8 @@ export function lessonToResponse(lesson: any) {
         xp: lesson.xp,
         durationMin: lesson.durationMin,
         completed: lesson.progress?.[0]?.completed ?? false,
+
+        taskId: lesson.taskId ?? null,
+        questionId: lesson.questionId ?? null
     };
 }

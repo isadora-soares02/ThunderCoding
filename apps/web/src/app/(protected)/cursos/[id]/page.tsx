@@ -22,9 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCourseDetail } from "@/hooks/use-course-details";
 
 const lessonIcon = {
-    text: FileText,
-    video: Video,
-    assignment: ClipboardList,
+    texto: FileText,
+    "vídeo": Video,
+    tarefa: ClipboardList,
     quiz: HelpCircle,
 } as const;
 
@@ -99,13 +99,21 @@ export default function CourseDetail() {
                         <ProgressBar gradient value={course.progress} />
                     </div>
 
-                    {proxima && (
-                        <Button asChild className="shadow-glow" size="lg">
-                            <Link href={`/aulas/${proxima.id}`}>
-                                <PlayCircle size={18} />{" "}
-                                {course.progress === 0 ? "Começar curso" : "Continuar"}
+                    {course.progress === 100 ? (
+                        <Button asChild className="shadow-glow" size="lg" variant="default">
+                            <Link href={`/certificado/${course.id}`}>
+                                <CheckCircle2 size={18} /> Imprimir certificado
                             </Link>
                         </Button>
+                    ) : (
+                        proxima && (
+                            <Button asChild className="shadow-glow" size="lg">
+                                <Link href={`/aulas/${proxima.id}`}>
+                                    <PlayCircle size={18} />{" "}
+                                    {course.progress === 0 ? "Começar curso" : "Continuar"}
+                                </Link>
+                            </Button>
+                        )
                     )}
                 </div>
             </Card>
@@ -156,10 +164,10 @@ export default function CourseDetail() {
                                         href={
                                             l.type === "video"
                                                 ? `/aulas/${l.id}/video`
-                                                : l.type === "quiz"
-                                                    ? `/quiz/${questions[0]?.id ?? l.id}`
-                                                    : l.type === "assignment"
-                                                        ? `/tarefas/${tasks[0]?.id ?? l.id}`
+                                                : l.type === "quiz" && l.questionId
+                                                    ? `/quiz/${l.questionId}`
+                                                    : l.type === "tarefa" && l.taskId
+                                                        ? `/tarefas/${l.taskId}`
                                                         : `/aulas/${l.id}`
                                         }
                                     >
@@ -178,8 +186,17 @@ export default function CourseDetail() {
 
                     {tasks.map((t) => (
                         <Card className="flex items-center gap-3 p-3" key={t.id}>
-                            <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/15 text-accent">
-                                <ClipboardList size={18} />
+                            <div
+                                className={`grid h-10 w-10 place-items-center rounded-xl ${t.completed
+                                    ? "bg-success/15 text-success"
+                                    : "bg-accent/15 text-accent"
+                                    }`}
+                            >
+                                {t.completed ? (
+                                    <CheckCircle2 size={18} />
+                                ) : (
+                                    <ClipboardList size={18} />
+                                )}
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -190,8 +207,14 @@ export default function CourseDetail() {
                                 </p>
                             </div>
 
-                            <Button asChild size="sm">
-                                <Link href={`/tarefas/${t.id}`}>Começar</Link>
+                            <Button
+                                asChild
+                                size="sm"
+                                variant={t.completed ? "outline" : "default"}
+                            >
+                                <Link href={`/tarefas/${t.id}`}>
+                                    {t.completed ? "Revisar" : "Começar"}
+                                </Link>
                             </Button>
                         </Card>
                     ))}
@@ -204,8 +227,13 @@ export default function CourseDetail() {
 
                     {questions.map((q) => (
                         <Card className="flex items-center gap-3 p-3" key={q.id}>
-                            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary/15 text-secondary">
-                                <HelpCircle size={18} />
+                            <div
+                                className={`grid h-10 w-10 place-items-center rounded-xl ${q.completed
+                                    ? "bg-success/15 text-success"
+                                    : "bg-secondary/15 text-secondary"
+                                    }`}
+                            >
+                                {q.completed ? <CheckCircle2 size={18} /> : <HelpCircle size={18} />}
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -216,13 +244,19 @@ export default function CourseDetail() {
                                 </p>
                             </div>
 
-                            <Button asChild size="sm">
-                                <Link href={`/quiz/${q.id}`}>Responder</Link>
+                            <Button
+                                asChild
+                                size="sm"
+                                variant={q.completed ? "outline" : "default"}
+                            >
+                                <Link href={`/quiz/${q.id}`}>
+                                    {q.completed ? "Revisar" : "Responder"}
+                                </Link>
                             </Button>
                         </Card>
                     ))}
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 }

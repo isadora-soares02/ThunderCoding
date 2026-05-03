@@ -11,9 +11,9 @@ interface TaskResponse {
 
 interface SubmitTaskResponse {
     completed: boolean;
-    conquistasDesbloqueadas: string[];
     level: number;
     message: string;
+    unlockedAchievements: string[];
     xpEarned: number;
 }
 
@@ -37,8 +37,13 @@ export function useSubmitTask(id?: string) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["task", id] });
             queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-            queryClient.invalidateQueries({ queryKey: ["achievements"] });
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
             queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["course"] });
+            queryClient.invalidateQueries({ queryKey: ["course-lessons"] });
+            queryClient.invalidateQueries({ queryKey: ["course-tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["course-questions"] });
+            queryClient.invalidateQueries({ queryKey: ["achievements"] });
         },
     });
 }

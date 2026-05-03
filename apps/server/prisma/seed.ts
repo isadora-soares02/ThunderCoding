@@ -1,5 +1,4 @@
 import { prisma } from "../src/lib/prisma";
-import { calculateLevel } from "../src/utils/xp";
 
 async function main() {
     await prisma.userAchievement.deleteMany();
@@ -13,26 +12,6 @@ async function main() {
     await prisma.achievement.deleteMany();
     await prisma.trail.deleteMany();
     await prisma.course.deleteMany();
-
-    const xp = 2840;
-    const nivelData = calculateLevel(xp);
-
-    const user = await prisma.user.upsert({
-        where: {
-            email: "admin@thundercoding.dev",
-        },
-        update: {},
-        create: {
-            name: "Admin – ThunderCoding",
-            email: "admin@thundercoding.dev",
-            emailVerified: true,
-            xp,
-            level: nivelData.level,
-            streak: 5,
-            completedCourses: 3,
-            role: "ADMIN",
-        },
-    });
 
     const c1 = await prisma.course.create({
         data: {
@@ -199,85 +178,6 @@ async function main() {
         },
     });
 
-    await prisma.lesson.createMany({
-        data: [
-            {
-                id: "l1",
-                courseId: "c1",
-                title: "Boas-vindas ao TypeScript",
-                type: "TEXT",
-                content:
-                    "TypeScript é um superset de JavaScript que adiciona tipagem estática.\n\nIsso ajuda você a evitar bugs e escrever código mais confiável.",
-                order: 1,
-                xp: 30,
-                durationMin: 5,
-            },
-            {
-                id: "l2",
-                courseId: "c1",
-                title: "Tipos primitivos",
-                type: "TEXT",
-                content:
-                    "Os tipos básicos são string, number, boolean, null e undefined.\n\nExemplo:\nlet name: string = 'Lucas';\nlet idade: number = 18;",
-                order: 2,
-                xp: 40,
-                durationMin: 8,
-            },
-            {
-                id: "l3",
-                courseId: "c1",
-                title: "Funções tipadas",
-                type: "VIDEO",
-                content: "Aprenda a tipar parâmetros e retornos.",
-                videoUrl: "https://www.youtube.com/watch?v=m5YwmzbjszY",
-                order: 3,
-                xp: 50,
-                durationMin: 12,
-            },
-            {
-                id: "l4",
-                courseId: "c1",
-                title: "Quiz: tipos básicos",
-                type: "QUIZ",
-                content: "Quiz sobre tipos.",
-                order: 4,
-                xp: 80,
-                durationMin: 6,
-            },
-            {
-                id: "l5",
-                courseId: "c1",
-                title: "Tarefa: criando uma função",
-                type: "ASSIGNMENT",
-                content: "Crie uma função somar que recebe dois números.",
-                order: 5,
-                xp: 100,
-                durationMin: 15,
-            },
-            {
-                id: "l6",
-                courseId: "c2",
-                title: "O que é um algoritmo?",
-                type: "TEXT",
-                content:
-                    "Um algoritmo é uma sequência finita de instruções para resolver um problema.",
-                order: 1,
-                xp: 30,
-                durationMin: 5,
-            },
-            {
-                id: "l7",
-                courseId: "c2",
-                title: "Estruturas de repetição",
-                type: "VIDEO",
-                content: "for, while e do-while.",
-                order: 2,
-                xp: 50,
-                durationMin: 10,
-            },
-        ],
-    });
-
     await prisma.question.createMany({
         data: [
             {
@@ -370,6 +270,87 @@ async function main() {
         ],
     });
 
+    await prisma.lesson.createMany({
+        data: [
+            {
+                id: "l1",
+                courseId: "c1",
+                title: "Boas-vindas ao TypeScript",
+                type: "TEXT",
+                content:
+                    "TypeScript é um superset de JavaScript que adiciona tipagem estática.\n\nIsso ajuda você a evitar bugs e escrever código mais confiável.",
+                order: 1,
+                xp: 30,
+                durationMin: 5,
+            },
+            {
+                id: "l2",
+                courseId: "c1",
+                title: "Tipos primitivos",
+                type: "TEXT",
+                content:
+                    "Os tipos básicos são string, number, boolean, null e undefined.\n\nExemplo:\nlet name: string = 'Lucas';\nlet idade: number = 18;",
+                order: 2,
+                xp: 40,
+                durationMin: 8,
+            },
+            {
+                id: "l3",
+                courseId: "c1",
+                title: "Funções tipadas",
+                type: "VIDEO",
+                content: "Aprenda a tipar parâmetros e retornos.",
+                videoUrl: "https://www.youtube.com/watch?v=m5YwmzbjszY",
+                order: 3,
+                xp: 50,
+                durationMin: 12,
+            },
+            {
+                id: "l4",
+                courseId: "c1",
+                title: "Quiz: tipos básicos",
+                type: "QUIZ",
+                content: "Quiz sobre tipos.",
+                order: 4,
+                xp: 80,
+                durationMin: 6,
+                questionId: "q2",
+            },
+            {
+                id: "l5",
+                courseId: "c1",
+                title: "Tarefa: criando uma função",
+                type: "ASSIGNMENT",
+                content: "Crie uma função somar que recebe dois números.",
+                order: 5,
+                xp: 100,
+                durationMin: 15,
+                taskId: "tk2",
+            },
+            {
+                id: "l6",
+                courseId: "c2",
+                title: "O que é um algoritmo?",
+                type: "TEXT",
+                content:
+                    "Um algoritmo é uma sequência finita de instruções para resolver um problema.",
+                order: 1,
+                xp: 30,
+                durationMin: 5,
+            },
+            {
+                id: "l7",
+                courseId: "c2",
+                title: "Estruturas de repetição",
+                type: "VIDEO",
+                content: "for, while e do-while.",
+                order: 2,
+                xp: 50,
+                durationMin: 10,
+            },
+        ],
+    });
+
     await prisma.achievement.createMany({
         data: [
             {
@@ -429,53 +410,53 @@ async function main() {
         ],
     });
 
-    await prisma.userLessonProgress.createMany({
-        data: [
-            {
-                userId: user.id,
-                lessonId: "l1",
-                completed: true,
-            },
-            {
-                userId: user.id,
-                lessonId: "l2",
-                completed: true,
-            },
-            {
-                userId: user.id,
-                lessonId: "l6",
-                completed: true,
-            },
-            {
-                userId: user.id,
-                lessonId: "l7",
-                completed: true,
-            },
-        ],
-    });
+    // await prisma.userLessonProgress.createMany({
+    //     data: [
+    //         {
+    //             userId: user.id,
+    //             lessonId: "l1",
+    //             completed: true,
+    //         },
+    //         {
+    //             userId: user.id,
+    //             lessonId: "l2",
+    //             completed: true,
+    //         },
+    //         {
+    //             userId: user.id,
+    //             lessonId: "l6",
+    //             completed: true,
+    //         },
+    //         {
+    //             userId: user.id,
+    //             lessonId: "l7",
+    //             completed: true,
+    //         },
+    //     ],
+    // });
 
-    await prisma.userCourseProgress.createMany({
-        data: [
-            {
-                userId: user.id,
-                courseId: "c1",
-                progress: 45,
-                completed: false,
-            },
-            {
-                userId: user.id,
-                courseId: "c2",
-                progress: 80,
-                completed: false,
-            },
-            {
-                userId: user.id,
-                courseId: "c5",
-                progress: 100,
-                completed: true,
-            },
-        ],
-    });
+    // await prisma.userCourseProgress.createMany({
+    //     data: [
+    //         {
+    //             userId: user.id,
+    //             courseId: "c1",
+    //             progress: 45,
+    //             completed: false,
+    //         },
+    //         {
+    //             userId: user.id,
+    //             courseId: "c2",
+    //             progress: 80,
+    //             completed: false,
+    //         },
+    //         {
+    //             userId: user.id,
+    //             courseId: "c5",
+    //             progress: 100,
+    //             completed: true,
+    //         },
+    //     ],
+    // });
 
     console.log("Seed concluído com sucesso!");
 }

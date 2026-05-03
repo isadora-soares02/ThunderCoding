@@ -92,6 +92,8 @@ export default function QuizView() {
     const total = allForCourse.length;
 
     const escolher = (l: Letter) => {
+        if (q?.completed) { return }
+
         if (showFeedback || answerQuestion.isPending) {
             return;
         }

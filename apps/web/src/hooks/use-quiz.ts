@@ -47,8 +47,13 @@ export function useAnswerQuestion() {
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-            queryClient.invalidateQueries({ queryKey: ["achievements"] });
             queryClient.invalidateQueries({ queryKey: ["profile"] });
+            queryClient.invalidateQueries({ queryKey: ["courses"] });
+            queryClient.invalidateQueries({ queryKey: ["course"] });
+            queryClient.invalidateQueries({ queryKey: ["course-lessons"] });
+            queryClient.invalidateQueries({ queryKey: ["course-tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["course-questions"] });
+            queryClient.invalidateQueries({ queryKey: ["achievements"] });
         },
     });
 }
