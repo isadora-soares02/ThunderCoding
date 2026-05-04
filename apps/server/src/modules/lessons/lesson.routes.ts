@@ -13,22 +13,38 @@ import { recalculateAllUserTrailsForCourse, recalculateCourseProgress } from "..
 import { lessonToResponse } from "./lesson.mapper.js";
 
 export function lessonRoutes(app: FastifyInstance) {
-    app.get("/courses/:id/lessons", async (request) => {
-        const { id } = z.object({ id: z.string() }).parse(request.params);
+    app.get("/courses/:id/lessons",
+        {
+            preHandler: requireAuth,
+        },
+        async (request) => {
+            const { id } = z.object({ id: z.string() }).parse(request.params);
 
-        const lessons = await prisma.lesson.findMany({
-            where: {
-                courseId: id,
-            },
-            orderBy: {
-                order: "asc",
-            },
+            const session = await getSession(request);
+            const userId = session?.user?.id;
+
+            const lessons = await prisma.lesson.findMany({
+                where: {
+                    courseId: id,
+                },
+                orderBy: {
+                    order: "asc",
+                },
+                include: {
+                    progress: userId
+                        ? {
+                            where: {
+                                userId,
+                            },
+                        }
+                        : false,
+                },
+            });
+
+            return {
+                lessons: lessons.map(lessonToResponse),
+            };
         });
-
-        return {
-            lessons: lessons.map(lessonToResponse),
-        };
-    });
 
     app.get(
         "/lessons/:id",

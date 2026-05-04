@@ -36,7 +36,6 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
     const user = data?.user;
     const router = useRouter();
     if (!user) {
-        console.log("Sem user");
         return null;
     }
     const { currentXp, xpPerLevel, percentage } = xpToNextLevel(user.xp);
@@ -72,7 +71,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                         </NavLink>
                     ))}
 
-                    {user.role === "ADMIN" && (
+                    {user.isAdmin && (
                         <NavLink
                             className={({ isActive }) =>
                                 cn(

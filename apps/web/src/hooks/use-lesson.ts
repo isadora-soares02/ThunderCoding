@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
 import type { Lesson } from "@/types";
 
-interface LessonResponse {
+export interface LessonResponse {
     lesson: Lesson;
 }
 

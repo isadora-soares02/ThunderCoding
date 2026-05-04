@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { prisma } from "../../lib/prisma";
-import { getSession, requireAdmin } from "../../plugins/auth";
+import { getSession, requireAdmin, requireAuth } from "../../plugins/auth";
 import {
     courseQuerySchema,
     createCourseSchema,
@@ -10,121 +10,129 @@ import { toCourseStatus, toDifficulty } from "../../utils/enums";
 import { courseToResponse } from "./course.mapper";
 
 export function courseRoutes(app: FastifyInstance) {
-    app.get("/courses", async (request) => {
-        const query = courseQuerySchema.parse(request.query);
+    app.get("/courses",
+        {
+            preHandler: requireAuth,
+        },
+        async (request) => {
+            const query = courseQuerySchema.parse(request.query);
 
-        const session = await getSession(request);
-        const userId = session?.user?.id;
+            const session = await getSession(request);
+            const userId = session?.user?.id;
 
-        const courses = await prisma.course.findMany({
-            where: {
-                status: query.status ? toCourseStatus(query.status) : "PUBLISHED",
-                language: query.language
-                    ? {
-                        contains: query.language,
-                        mode: "insensitive",
-                    }
-                    : undefined,
-                level: query.level ? toDifficulty(query.level) : undefined,
-                OR: query.search
-                    ? [
-                        {
-                            title: {
-                                contains: query.search,
-                                mode: "insensitive",
+            const courses = await prisma.course.findMany({
+                where: {
+                    status: query.status ? toCourseStatus(query.status) : "PUBLISHED",
+                    language: query.language
+                        ? {
+                            contains: query.language,
+                            mode: "insensitive",
+                        }
+                        : undefined,
+                    level: query.level ? toDifficulty(query.level) : undefined,
+                    OR: query.search
+                        ? [
+                            {
+                                title: {
+                                    contains: query.search,
+                                    mode: "insensitive",
+                                },
                             },
-                        },
-                        {
-                            description: {
-                                contains: query.search,
-                                mode: "insensitive",
+                            {
+                                description: {
+                                    contains: query.search,
+                                    mode: "insensitive",
+                                },
                             },
-                        },
-                        {
-                            language: {
-                                contains: query.search,
-                                mode: "insensitive",
+                            {
+                                language: {
+                                    contains: query.search,
+                                    mode: "insensitive",
+                                },
                             },
-                        },
-                    ]
-                    : undefined,
-            },
-            include: {
-                _count: {
-                    select: {
-                        lessons: true,
-                    },
+                        ]
+                        : undefined,
                 },
-                progress: userId
-                    ? {
-                        where: {
-                            userId,
+                include: {
+                    _count: {
+                        select: {
+                            lessons: true,
                         },
-                    }
-                    : false,
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-
-        return {
-            courses: courses.map(courseToResponse),
-        };
-    });
-
-    app.get("/courses/:id", async (request, reply) => {
-        const params = zIdParam(request.params);
-        const session = await getSession(request);
-        const userId = session?.user?.id;
-
-        const course = await prisma.course.findUnique({
-            where: {
-                id: params.id,
-            },
-            include: {
-                lessons: {
-                    orderBy: {
-                        order: "asc",
                     },
-                    include: {
-                        progress: {
+                    progress: userId
+                        ? {
                             where: {
                                 userId,
                             },
-                        },
-                    },
+                        }
+                        : false,
                 },
-                questions: true,
-                tasks: true,
-                _count: {
-                    select: {
-                        lessons: true,
-                    },
+                orderBy: {
+                    createdAt: "desc",
                 },
-                progress: userId
-                    ? {
-                        where: {
-                            userId,
-                        },
-                    }
-                    : false,
-            },
+            });
+
+            return {
+                courses: courses.map(courseToResponse),
+            };
         });
 
-        if (!course) {
-            return reply.status(404).send({
-                message: "Curso não encontrado.",
-            });
-        }
+    app.get("/courses/:id",
+        {
+            preHandler: requireAuth,
+        },
+        async (request, reply) => {
+            const params = zIdParam(request.params);
+            const session = await getSession(request);
+            const userId = session?.user?.id;
 
-        return {
-            course: courseToResponse(course),
-            lessons: course.lessons.map((lesson) => lessonToResponse(lesson)),
-            totalQuestions: course.questions.length,
-            totalTasks: course.tasks.length,
-        };
-    });
+            const course = await prisma.course.findUnique({
+                where: {
+                    id: params.id,
+                },
+                include: {
+                    lessons: {
+                        orderBy: {
+                            order: "asc",
+                        },
+                        include: {
+                            progress: {
+                                where: {
+                                    userId,
+                                },
+                            },
+                        },
+                    },
+                    questions: true,
+                    tasks: true,
+                    _count: {
+                        select: {
+                            lessons: true,
+                        },
+                    },
+                    progress: userId
+                        ? {
+                            where: {
+                                userId,
+                            },
+                        }
+                        : false,
+                },
+            });
+
+            if (!course) {
+                return reply.status(404).send({
+                    message: "Curso não encontrado.",
+                });
+            }
+
+            return {
+                course: courseToResponse(course),
+                lessons: course.lessons.map((lesson) => lessonToResponse(lesson)),
+                totalQuestions: course.questions.length,
+                totalTasks: course.tasks.length,
+            };
+        });
 
     app.post(
         "/admin/courses",

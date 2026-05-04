@@ -30,8 +30,6 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
                     ? href.pathname
                     : "";
 
-        console.log({ pathname, hrefString })
-
         const isActive = end
             ? pathname === hrefString
             : hrefString === "/"

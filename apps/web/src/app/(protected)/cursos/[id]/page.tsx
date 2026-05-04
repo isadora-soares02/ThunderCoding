@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { CourseDetail } from "@/components/pages/cursos/course-detail";
 import type { CourseDetailResponse } from "@/hooks/use-course-details";
 import { apiFetch } from "@/lib/api-fetch";
@@ -7,8 +8,14 @@ interface Props {
     params: Promise<{ id: string }>;
 }
 
-function getCourse(id: string) {
-    return apiFetch<CourseDetailResponse>(`/api/courses/${id}`);
+async function getCourse(id: string) {
+    const cookieStore = await cookies();
+
+    return apiFetch<CourseDetailResponse>(`/api/courses/${id}`, {
+        headers: {
+            Cookie: cookieStore.toString(),
+        },
+    });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

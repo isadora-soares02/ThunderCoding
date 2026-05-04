@@ -89,10 +89,6 @@ export function QuizViewPage({ id }: { id: string }) {
     const total = allForCourse.length;
 
     const escolher = (l: Letter) => {
-        if (q?.completed) {
-            return;
-        }
-
         if (showFeedback || answerQuestion.isPending) {
             return;
         }
@@ -101,7 +97,7 @@ export function QuizViewPage({ id }: { id: string }) {
 
         answerQuestion.mutate(
             {
-                questionId: q?.id,
+                questionId: q.id,
                 answer: l,
             },
             {
@@ -212,7 +208,7 @@ export function QuizViewPage({ id }: { id: string }) {
                             return (
                                 <button
                                     className={cn(
-                                        "group flex items-center gap-3 rounded-2xl border p-4 text-left transition-smooth",
+                                        "group flex cursor-pointer items-center gap-3 rounded-2xl border p-4 text-left transition-smooth",
                                         !showFeedback && "hover:border-primary hover:bg-primary/5",
                                         isChosen && !showFeedback && "border-primary bg-primary/10",
                                         showRight && "border-success bg-success/10",
@@ -220,6 +216,7 @@ export function QuizViewPage({ id }: { id: string }) {
                                     )}
                                     key={letter}
                                     onClick={() => escolher(letter)}
+                                    type="button"
                                 >
                                     <span
                                         className={cn(

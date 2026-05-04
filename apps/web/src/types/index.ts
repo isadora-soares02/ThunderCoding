@@ -7,9 +7,10 @@ export interface User {
     completedCourses: number;
     email: string;
     id: string;
-    role: string
+    isAdmin?: boolean;
     level: number;
     name: string;
+    role: string;
     streak: number;
     xp: number;
 }

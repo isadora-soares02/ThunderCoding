@@ -40,7 +40,7 @@ export function useAnswerQuestion() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: { questionId: string; resposta: Letter }) =>
+        mutationFn: (payload: { questionId: string; answer: Letter }) =>
             apiFetch<AnswerQuestionResponse>("/api/quizzes/answer", {
                 method: "POST",
                 body: JSON.stringify(payload),

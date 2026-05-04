@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
 import type { Task } from "@/types";
 
-interface TaskResponse {
+export interface TaskResponse {
     task: Task & {
         completed?: boolean;
         answer?: string;

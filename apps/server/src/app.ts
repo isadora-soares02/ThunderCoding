@@ -82,6 +82,7 @@ export async function buildApp() {
                         id: user.id,
                         name: user.name,
                         email: user.email,
+                        role: user.role,
                         avatarUrl: user.image,
                         xp: user.xp,
                         level: user.level,

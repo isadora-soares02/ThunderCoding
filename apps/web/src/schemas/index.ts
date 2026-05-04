@@ -24,7 +24,8 @@ export const courseSchema = z.object({
     level: z.enum(["Iniciante", "Intermediário", "Avançado"], { message: "Nível obrigatório" }),
     duration: z.string().min(1, "Duração obrigatória"),
     xp: z.coerce.number().positive("XP deve ser positivo"),
-    banner: z.string().url("URL inválida").or(z.literal("")).optional(),
+    banner: z.string().optional(),
+    instructor: z.string(),
     status: z.enum(["rascunho", "publicado"]),
 });
 
