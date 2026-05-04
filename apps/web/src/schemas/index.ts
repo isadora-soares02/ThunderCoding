@@ -40,7 +40,7 @@ export const trailSchema = z.object({
 export const lessonSchema = z.object({
     courseId: z.string().min(1, "Curso obrigatório"),
     title: z.string().min(2, "Título obrigatório"),
-    type: z.enum(["texto", "video", "tarefa", "quiz"]),
+    type: z.enum(["texto", "vídeo", "tarefa", "quiz"]),
     content: z.string().min(1, "Conteúdo obrigatório"),
     videoUrl: z.string().url().or(z.literal("")).optional(),
     order: z.coerce.number().int().nonnegative(),

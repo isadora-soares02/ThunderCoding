@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createLessonSchema = z.object({
     courseId: z.string().min(1),
     title: z.string().min(2),
-    type: z.enum(["texto", "video", "tarefa", "quiz"]),
+    type: z.enum(["texto", "vídeo", "tarefa", "quiz"]),
     content: z.string().min(1),
     videoUrl: z.string().optional().nullable(),
     order: z.coerce.number().int().nonnegative(),
