@@ -1,11 +1,12 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { sendVerificationEmail } from "./email";
 import { env } from "./env";
 import { prisma } from "./prisma";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql"
+        provider: "postgresql",
     }),
 
     secret: env.BETTER_AUTH_SECRET,
@@ -17,14 +18,21 @@ export const auth = betterAuth({
         requireEmailVerification: true,
         minPasswordLength: 8,
         maxPasswordLength: 128,
-        autoSignIn: true
+        autoSignIn: true,
     },
 
     emailVerification: {
         sendOnSignIn: true,
         sendOnSignUp: true,
         sendVerificationEmail: async ({ user, url }) => {
-            // teste
+            const verifyUrl = new URL(url);
+
+            verifyUrl.searchParams.set(
+                "callbackURL",
+                `${env.FRONTEND_URL}/verify-email`
+            );
+
+            await sendVerificationEmail(user.email, verifyUrl.toString(), user.name);
         }
     },
 
@@ -34,7 +42,7 @@ export const auth = betterAuth({
                 type: "string",
                 required: false,
                 defaultValue: "USER",
-                input: false
+                input: false,
             },
             xp: {
                 type: "number",
@@ -58,12 +66,12 @@ export const auth = betterAuth({
                 type: "number",
                 required: false,
                 defaultValue: 0,
-                input: false
-            }
-        }
+                input: false,
+            },
+        },
     },
 
     experimental: {
-        joins: true
-    }
-})
+        joins: true,
+    },
+});

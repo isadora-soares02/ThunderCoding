@@ -1,8 +1,10 @@
 /** biome-ignore-all lint/performance/useTopLevelRegex: <> */
+/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: <explanation> */
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <> */
 /** biome-ignore-all lint/style/noNestedTernary: <> */
 "use client";
 
+import DOMPurify from "isomorphic-dompurify";
 import { ArrowLeft, ArrowRight, CheckCircle2, Video } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -97,6 +99,9 @@ export function LessonVideoPage({ id }: { id: string }) {
 
     const embedUrl = getYouTubeEmbedUrl(lesson.videoUrl);
 
+    const safeContent = DOMPurify.sanitize(lesson.content ?? "");
+
+
     return (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
             <div className="space-y-4">
@@ -131,7 +136,10 @@ export function LessonVideoPage({ id }: { id: string }) {
                     </div>
 
                     <h1 className="font-display text-2xl">{lesson.title}</h1>
-                    <p className="text-muted-foreground">{lesson.content}</p>
+                    <article
+                        className="prose prose-sm max-w-none text-foreground"
+                        dangerouslySetInnerHTML={{ __html: safeContent }}
+                    />
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
                         <Button

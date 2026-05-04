@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { TaskViewPage } from "@/components/pages/tarefas";
 import type { TaskResponse } from "@/hooks/use-task";
 import { apiFetch } from "@/lib/api-fetch";
@@ -7,8 +8,13 @@ interface Props {
     params: Promise<{ id: string }>;
 }
 
-function getTask(id: string) {
-    return apiFetch<TaskResponse>(`/api/tasks/${id}`);
+async function getTask(id: string) {
+     const cookieStore = await cookies();
+    return apiFetch<TaskResponse>(`/api/tasks/${id}`, {
+        headers: {
+            Cookie: cookieStore.toString(),
+        },
+    });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

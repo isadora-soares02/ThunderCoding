@@ -170,7 +170,7 @@ model Lesson {
   courseId    String
   title       String
   type        LessonType
-  content     String
+  content     String?
   videoUrl    String?
   order       Int
   xp          Int
