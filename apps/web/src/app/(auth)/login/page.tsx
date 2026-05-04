@@ -31,7 +31,7 @@ export default function LoginPage() {
             });
 
             if (error) {
-                toast.error(error.message)
+                toast.error(error.message);
                 return;
             }
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
                 </p>
             </div>
 
-            <div className="flex flex-col justify-center px-5 py-10 sm:px-10">
+            <div className="flex flex-col items-center justify-center px-5 py-10 sm:px-10">
                 <div className="mb-8 lg:hidden">
                     <Logo />
                 </div>

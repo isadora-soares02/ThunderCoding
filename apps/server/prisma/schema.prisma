@@ -60,6 +60,7 @@ model User {
   achievements     UserAchievement[]
   taskProgress     UserTaskProgress[]
   questionProgress UserQuestionProgress[]
+  certificates     Certificate[]
 
   @@map("user")
 }
@@ -121,11 +122,12 @@ model Course {
   color       String?
   status      CourseStatus @default(DRAFT)
 
-  lessons   Lesson[]
-  questions Question[]
-  tasks     Task[]
-  trails    TrailCourse[]
-  progress  UserCourseProgress[]
+  lessons      Lesson[]
+  questions    Question[]
+  tasks        Task[]
+  trails       TrailCourse[]
+  progress     UserCourseProgress[]
+  certificates Certificate[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -144,7 +146,8 @@ model Trail {
   color       String?
   icon        String?
 
-  courses TrailCourse[]
+  courses      TrailCourse[]
+  certificates Certificate[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -334,4 +337,26 @@ model UserQuestionProgress {
 
   @@unique([userId, questionId])
   @@map("userQuestionProgress")
+}
+
+enum CertificateType {
+  COURSE
+  TRAIL
+}
+
+model Certificate {
+  id       String          @id @default(cuid())
+  userId   String
+  courseId String?
+  trailId  String?
+  type     CertificateType
+  code     String          @unique
+  issuedAt DateTime        @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  trail  Trail?  @relation(fields: [trailId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, type])
+  @@unique([userId, trailId, type])
 }

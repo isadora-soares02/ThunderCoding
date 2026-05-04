@@ -97,7 +97,11 @@ export function CourseDetail({ id }: { id: string }) {
 
                     {course.progress === 100 ? (
                         <Button asChild className="shadow-glow" size="lg" variant="default">
-                            <Link href={`/certificado/${course.id}`}>
+                            <Link
+                                href={`/api/certificates/course/${course.id}`}
+                                rel="noreferrer"
+                                target="_blank"
+                            >
                                 <CheckCircle2 size={18} /> Imprimir certificado
                             </Link>
                         </Button>

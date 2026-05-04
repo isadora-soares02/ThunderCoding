@@ -8,6 +8,7 @@ import { auth } from "./lib/auth";
 import { prisma } from "./lib/prisma";
 import { achievementRoutes } from "./modules/achievement/achievement.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
+import { certificateRoutes } from "./modules/certificates/certificates.routes";
 import { courseRoutes } from "./modules/courses/course.routes";
 import { dashboardRoutes } from "./modules/dashboard/dashbord.routes";
 import { lessonRoutes } from "./modules/lessons/lesson.routes";
@@ -47,6 +48,7 @@ export async function buildApp() {
             await api.register(dashboardRoutes);
             await api.register(courseRoutes);
             await api.register(achievementRoutes);
+            await api.register(certificateRoutes);
             await api.register(adminRoutes);
 
             api.get("/me", async (request, reply) => {
