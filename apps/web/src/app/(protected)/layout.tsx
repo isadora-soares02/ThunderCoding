@@ -19,7 +19,8 @@ import { NavLink } from "@/components/navlink";
 import { ProgressBar } from "@/components/progress-bar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { authClient, useSession } from "@/lib/auth-client";
+import { useMe } from "@/hooks/use-me";
+import { authClient } from "@/lib/auth-client";
 import { cn, xpToNextLevel } from "@/lib/utils";
 
 const items = [
@@ -31,11 +32,11 @@ const items = [
 ];
 
 export default function StudentLayout({ children }: { children: ReactNode }) {
-    const { data: session } = useSession();
-    const user = session?.user;
+    const { data } = useMe();
+    const user = data?.user;
     const router = useRouter();
     if (!user) {
-        console.log("Sem user")
+        console.log("Sem user");
         return null;
     }
     const { currentXp, xpPerLevel, percentage } = xpToNextLevel(user.xp);

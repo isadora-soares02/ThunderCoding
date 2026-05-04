@@ -4,7 +4,7 @@ import type { Question } from "@/types";
 
 type Letter = "a" | "b" | "c" | "d";
 
-interface QuestionResponse {
+export interface QuestionResponse {
     question: Question;
 }
 

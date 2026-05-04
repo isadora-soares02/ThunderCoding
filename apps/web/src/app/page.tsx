@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ArrowRight, Brain, Flame, Sparkles, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
@@ -30,7 +30,7 @@ const features = [
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
       <header className="container flex items-center justify-between py-5">
         <Logo />
         <div className="flex items-center gap-2">

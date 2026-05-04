@@ -9,7 +9,7 @@ import {
     Trophy,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { XPBadge } from "@/components/badges/xp-badge";
 import { EmptyState } from "@/components/empty-state";
@@ -24,6 +24,8 @@ type Step = "inicio" | "andamento" | "concluido";
 export default function TaskView() {
     const params = useParams<{ id: string }>();
     const id = params.id;
+
+    const router = useRouter();
 
     const { data, isLoading, isError, error } = useTask(id);
     const submitTask = useSubmitTask(id);
@@ -75,10 +77,20 @@ export default function TaskView() {
 
     return (
         <div className="mx-auto max-w-2xl space-y-5">
-            <Button asChild size="sm" variant="ghost">
-                <Link href={`/cursos/${task.courseId}`}>
-                    <ArrowLeft size={16} /> Voltar ao curso
-                </Link>
+            <Button
+                asChild
+                className="cursor-pointer"
+                onClick={() => {
+                    if (window.history.length > 1) {
+                        router.back();
+                    } else {
+                        router.push(`/cursos/${task.courseId}`);
+                    }
+                }}
+                size="sm"
+                variant="outline"
+            >
+                <ArrowLeft size={16} /> Voltar
             </Button>
 
             {step === "inicio" && (
@@ -90,7 +102,6 @@ export default function TaskView() {
                     </div>
 
                     <h1 className="font-display text-2xl">{task.title}</h1>
-
 
                     <p className="text-muted-foreground">{task.description}</p>
 
@@ -145,12 +156,13 @@ export default function TaskView() {
                     </div>
 
                     <div>
-                        <label className="font-semibold text-sm">
+                        <label className="font-semibold text-sm" htmlFor="resposta">
                             Sua answer / código
                         </label>
 
                         <Textarea
                             className="mt-1 font-mono text-sm"
+                            id="resposta"
                             onChange={(e) => setanswer(e.target.value)}
                             placeholder="Cole seu código ou answer aqui..."
                             rows={8}
@@ -187,8 +199,19 @@ export default function TaskView() {
                     </div>
 
                     <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-center">
-                        <Button asChild variant="outline">
-                            <Link href={`/cursos/${task.courseId}`}>Voltar ao curso</Link>
+                        <Button
+                            asChild
+                            className="cursor-pointer"
+                            onClick={() => {
+                                if (window.history.length > 1) {
+                                    router.back();
+                                } else {
+                                    router.push(`/cursos/${task.courseId}`);
+                                }
+                            }}
+                            variant="outline"
+                        >
+                            <ArrowLeft size={16} /> Voltar
                         </Button>
 
                         <Button asChild className="shadow-glow">

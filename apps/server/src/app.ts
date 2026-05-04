@@ -49,7 +49,7 @@ export async function buildApp() {
             await api.register(achievementRoutes);
             await api.register(adminRoutes);
 
-            app.get("/me", async (request, reply) => {
+            api.get("/me", async (request, reply) => {
                 const session = await auth.api.getSession({
                     headers: fromNodeHeaders(request.headers),
                 });

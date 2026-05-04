@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
 import type { Course, Lesson, Question, Task } from "@/types";
 
-interface CourseDetailResponse {
+export interface CourseDetailResponse {
     course: Course;
     lessons: Lesson[];
     totalQuestions: number;

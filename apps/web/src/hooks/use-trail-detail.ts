@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
 import type { Course, Trail } from "@/types";
 
-interface TrailDetailResponse {
+export interface TrailDetailResponse {
     trail: Trail & {
         courses?: Course[];
     };
