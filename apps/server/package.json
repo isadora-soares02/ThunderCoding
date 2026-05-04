@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsup src/server.ts --format esm",
-    "start": "node dist/server.js",
+    "build": "prisma generate && tsup src/server.ts --format esm --out-dir dist --clean",
+    "start": "node dist/server.mjs",
     "studio": "npx prisma studio",
     "migrate": "npx prisma migrate dev",
     "database:up": "docker compose --profile dev up -d",
