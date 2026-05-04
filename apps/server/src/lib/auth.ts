@@ -18,6 +18,19 @@ export const auth = betterAuth({
         "https://api.thundercoding.apptivium.com.br",
     ],
 
+    advanced: {
+        crossSubDomainCookies: {
+            enabled: true,
+            domain: "thundercoding.apptivium.com.br"
+        },
+        useSecureCookies: true,
+        defaultCookieAttributes: {
+            secure: true,
+            sameSite: "lax",
+            path: "/"
+        }
+    },
+
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
