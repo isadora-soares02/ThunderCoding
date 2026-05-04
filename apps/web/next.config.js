@@ -1,7 +1,9 @@
-const apiUrl = process.env.API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 if (!apiUrl) {
-  throw new Error("API_URL is required. Set it in Dokploy build/runtime envs.");
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is required. Set it in Dokploy build/runtime envs."
+  );
 }
 
 /** @type {import('next').NextConfig} */
