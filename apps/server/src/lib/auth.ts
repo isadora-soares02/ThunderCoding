@@ -11,7 +11,12 @@ export const auth = betterAuth({
 
     secret: env.BETTER_AUTH_SECRET,
 
-    trustedOrigins: ["*"],
+    baseURL: "https://api.thundercoding.apptivium.com.br",
+
+    trustedOrigins: [
+        "https://thundercoding.apptivium.com.br",
+        "https://api.thundercoding.apptivium.com.br",
+    ],
 
     emailAndPassword: {
         enabled: true,

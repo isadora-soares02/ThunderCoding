@@ -1,3 +1,4 @@
+import cookie from "@fastify/cookie";
 import { fromNodeHeaders } from "better-auth/node";
 import Fastify from "fastify";
 import {
@@ -27,6 +28,9 @@ export async function buildApp() {
         logger: true,
     });
 
+    await app.register(cookie, {
+        secret: process.env.COOKIE_SECRET || "supersecret", // pode ser qualquer string forte
+    });
     await registerCors(app);
 
     await app.register(errorHandler);
